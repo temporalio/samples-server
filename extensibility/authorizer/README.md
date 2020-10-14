@@ -16,4 +16,4 @@ The sample implementation of the authorizer interface `authorization.Authorizer`
 - Run `tctl n l` to list available namespaces. You should only see "temporal-system" initially.
 - Run `tctl --ns test n register to create a namespace "test"
 - Run `tctl n l` To see "test" listed
-- Run `tctl --ns test n update` to try to update the "test" namespace. You should see a `PermissionDenied` error because `myAuthorizer` denies `UpdateNameSpace` calls.
+- Run `tctl --ns test n update` to try to update the "test" namespace. You should see a `PermissionDenied` error because `myAuthorizer` denies `UpdateNamespace` calls.
