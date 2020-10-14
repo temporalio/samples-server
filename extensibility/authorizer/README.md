@@ -9,7 +9,7 @@ The sample implementation of an authorizer `myAuthorizer` allows all requests to
 
 2. Create the database schema by running `make install-schema`.
 
-3. Start Temporal with the sample by running `go run authorizer/server/main.go`.
+3. Start Temporal by running `go run authorizer/server/main.go`.
 
 4. Use `tctl` to interact with Temporal
 
