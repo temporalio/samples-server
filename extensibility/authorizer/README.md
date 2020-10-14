@@ -1,6 +1,6 @@
 ### Authorizer
 
-This samples show how to inject a low-level authorizer component that can control access to all API calls.
+This sample shows how to inject a low-level authorizer component that can control access to all API calls. It includes an implementation of the authorizer `myAuthorizer` which allows all requests to the "temporal-system" namespace and denies `UpdateNameSpace` calls for all other namespaces.
 
 The sample implementation of an authorizer `myAuthorizer` allows all requests to the "temporal-system" namespace and denies `UpdateNameSpace` calls for all other namespaces.
 
@@ -17,4 +17,3 @@ The sample implementation of an authorizer `myAuthorizer` allows all requests to
 - Run `tctl --ns test n register to create a namespace "test"
 - Run `tctl n l` To see "test" listed
 - Run `tctl --ns test n update` to try to update the "test" namespace. You should see a `PermissionDenied` error because `myAuthorizer` denies `UpdateNameSpace` calls.
-
