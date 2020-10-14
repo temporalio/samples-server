@@ -41,7 +41,7 @@ func (a *myAuthorizer) Authorize(
 	ctx context.Context,
 	attributes *authorization.Attributes,
 ) (authorization.Result, error) {
-	// Do not interfere with "temporal-system" namespace
+	// Allow all operations within "temporal-system" namespace
 	if attributes.Namespace == "temporal-system" {
 		return decisionAllow, nil
 	}
