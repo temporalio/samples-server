@@ -5,7 +5,7 @@ This sample shows how to inject a low-level authorizer component that can contro
 The sample implementation of an authorizer `myAuthorizer` allows all requests to the "temporal-system" namespace and denies `UpdateNameSpace` calls for all other namespaces.
 
 ### Steps to run this sample
-1. Start dependencies with `make start-dependencies` executed from the main Temporal repository as described in the [contribution guide](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md#runing-server-locally).
+1. Start up the dependencies by running the `make start-dependencies` command from within the main Temporal repository as described in the [contribution guide](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md#runing-server-locally).
 
 2. Create database schema with `make install-schema`.
 
