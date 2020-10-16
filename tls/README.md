@@ -14,4 +14,3 @@ bash generate-test-certs.sh
 bash start-temporal.sh
 ```
 
-Note: This sample doesn't yet include `tctl`.
