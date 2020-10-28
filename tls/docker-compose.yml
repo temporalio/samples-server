@@ -6,7 +6,7 @@ services:
     ports:
       - "9042:9042"
   temporal:
-    image: temporalio/auto-setup:${SERVER_TAG:-1.1.0}
+    image: temporalio/auto-setup:${SERVER_TAG:-1.2.1}
     ports:
       - "7233:7233"
     volumes:
@@ -23,11 +23,15 @@ services:
       - "TEMPORAL_TLS_FRONTEND_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
       - "TEMPORAL_TLS_CLIENT1_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_CLIENT2_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
+      - "TEMPORAL_TLS_INTERNODE_SERVER_NAME=tls-sample"
+      - "TEMPORAL_TLS_FRONTEND_SERVER_NAME=tls-sample"
+      - "TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION=false"
+      - "TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION=false"
       - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
     depends_on:
       - cassandra
   temporal-admin-tools:
-    image: temporalio/admin-tools:${SERVER_TAG:-1.1.0}
+    image: temporalio/admin-tools:${SERVER_TAG:-1.2.1}
     stdin_open: true
     tty: true
     volumes:
@@ -37,5 +41,7 @@ services:
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client.pem"
       - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client.key"
+      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_CLI_TLS_SERVER_NAME=tls-sample"
     depends_on:
       - temporal
