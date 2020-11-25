@@ -1,0 +1,261 @@
+log:
+    stdout: true
+    level: {{ default .Env.LOG_LEVEL "info" }}
+
+persistence:
+    numHistoryShards: {{ default .Env.NUM_HISTORY_SHARDS "4" }}
+    defaultStore: default
+    visibilityStore: visibility
+    {{- $es := default .Env.ENABLE_ES "false" | lower -}}
+    {{- if eq $es "true" }}
+    advancedVisibilityStore: es-visibility
+    {{- end }}
+    datastores:
+        {{- $db := default .Env.DB "cassandra" | lower -}}
+        {{- if eq $db "cassandra" }}
+        default:
+            cassandra:
+                hosts: {{ default .Env.CASSANDRA_SEEDS "" }}
+                keyspace: {{ default .Env.KEYSPACE "temporal" }}
+                user: {{ default .Env.CASSANDRA_USER "" }}
+                password: {{ default .Env.CASSANDRA_PASSWORD "" }}
+                port: {{ default .Env.CASSANDRA_PORT "9042" }}
+                tls:
+                    enabled: {{ default .Env.CASSANDRA_TLS_ENABLED "false" }}
+                    caFile: {{ default .Env.CASSANDRA_CA ""}}
+                    certFile: {{ default .Env.CASSANDRA_CERT "" }}
+                    keyFile: {{ default .Env.CASSANDRA_CERT_KEY "" }}
+                    caData: {{ default .Env.CASSANDRA_CA_DATA "" }}
+                    certData: {{ default .Env.CASSANDRA_CERT_DATA "" }}
+                    keyData: {{ default .Env.CASSANDRA_CERT_KEY_DATA "" }}
+                    enableHostVerification: {{ default .Env.CASSANDRA_HOST_VERIFICATION "false"}}
+
+        visibility:
+            cassandra:
+                hosts: {{ default .Env.CASSANDRA_SEEDS "" }}
+                keyspace: {{ default .Env.VISIBILITY_KEYSPACE "temporal_visibility" }}
+                user: {{ default .Env.CASSANDRA_USER "" }}
+                password: {{ default .Env.CASSANDRA_PASSWORD "" }}
+                port: {{ default .Env.CASSANDRA_PORT "9042" }}
+                tls:
+                    enabled: {{ default .Env.CASSANDRA_TLS_ENABLED "false" }}
+                    caFile: {{ default .Env.CASSANDRA_CA ""}}
+                    certFile: {{ default .Env.CASSANDRA_CERT "" }}
+                    keyFile: {{ default .Env.CASSANDRA_CERT_KEY "" }}
+                    caData: {{ default .Env.CASSANDRA_CA_DATA "" }}
+                    certData: {{ default .Env.CASSANDRA_CERT_DATA "" }}
+                    keyData: {{ default .Env.CASSANDRA_CERT_KEY_DATA "" }}
+                    enableHostVerification: {{ default .Env.CASSANDRA_HOST_VERIFICATION "false"}}
+        {{- else if eq $db "mysql" }}
+        default:
+            sql:
+                pluginName: "mysql"
+                databaseName: {{ default .Env.DBNAME "temporal" }}
+                connectAddr: "{{ default .Env.MYSQL_SEEDS "" }}:{{ default .Env.DB_PORT "3306" }}"
+                connectProtocol: "tcp"
+                user: {{ default .Env.MYSQL_USER "" }}
+                password: {{ default .Env.MYSQL_PWD "" }}
+                {{- if .Env.MYSQL_TX_ISOLATION_COMPAT }}
+                connectAttributes:
+                    tx_isolation: 'READ-COMMITTED'
+                {{- end }}
+                maxConns: {{ default .Env.SQL_MAX_CONNS "20" }}
+                maxIdleConns: {{ default .Env.SQL_MAX_IDLE_CONNS "20" }}
+                maxConnLifetime: {{ default .Env.SQL_MAX_CONN_TIME "1h" }}
+        visibility:
+            sql:
+                pluginName: "mysql"
+                databaseName: {{ default .Env.VISIBILITY_DBNAME "temporal_visibility" }}
+                connectAddr: "{{ default .Env.MYSQL_SEEDS "" }}:{{ default .Env.DB_PORT "3306" }}"
+                connectProtocol: "tcp"
+                user: {{ default .Env.MYSQL_USER "" }}
+                password: {{ default .Env.MYSQL_PWD "" }}
+                {{- if .Env.MYSQL_TX_ISOLATION_COMPAT }}
+                connectAttributes:
+                    tx_isolation: 'READ-COMMITTED'
+                {{- end }}
+                maxConns: {{ default .Env.SQL_VIS_MAX_CONNS "20" }}
+                maxIdleConns: {{ default .Env.SQL_VIS_MAX_IDLE_CONNS "20" }}
+                maxConnLifetime: {{ default .Env.SQL_VIS_MAX_CONN_TIME "1h" }}
+        {{- else if eq $db "postgresql" }}
+        default:
+            sql:
+                pluginName: "postgres"
+                databaseName: {{ default .Env.DBNAME "temporal" }}
+                connectAddr: "{{ default .Env.POSTGRES_SEEDS "" }}:{{ default .Env.DB_PORT "5432" }}"
+                connectProtocol: "tcp"
+                user: {{ default .Env.POSTGRES_USER "" }}
+                password: {{ default .Env.POSTGRES_PWD "" }}
+                maxConns: {{ default .Env.SQL_MAX_CONNS "20" }}
+                maxIdleConns: {{ default .Env.SQL_MAX_IDLE_CONNS "20" }}
+                maxConnLifetime: {{ default .Env.SQL_MAX_CONN_TIME "1h" }}
+        visibility:
+            sql:
+                pluginName: "postgres"
+                databaseName: {{ default .Env.VISIBILITY_DBNAME "temporal_visibility" }}
+                connectAddr: "{{ default .Env.POSTGRES_SEEDS "" }}:{{ default .Env.DB_PORT "5432" }}"
+                connectProtocol: "tcp"
+                user: {{ default .Env.POSTGRES_USER "" }}
+                password: {{ default .Env.POSTGRES_PWD "" }}
+                maxConns: {{ default .Env.SQL_VIS_MAX_CONNS "20" }}
+                maxIdleConns: {{ default .Env.SQL_VIS_MAX_IDLE_CONNS "20" }}
+                maxConnLifetime: {{ default .Env.SQL_VIS_MAX_CONN_TIME "1h" }}
+        {{- end }}
+        {{- if eq $es "true" }}
+        es-visibility:
+            elasticsearch:
+                url:
+                    scheme: {{ default .Env.ES_SCHEME "http" }}
+                    host: "{{ default .Env.ES_SEEDS "" }}:{{ default .Env.ES_PORT "9200" }}"
+                username: {{ default .Env.ES_USER "" }}
+                password: {{ default .Env.ES_PWD "" }}
+                indices:
+                    visibility: {{ default .Env.ES_VIS_INDEX "temporal-visibility-dev" }} 
+        {{- end }}
+
+global:
+    membership:
+        maxJoinDuration: 30s
+        broadcastAddress: {{ default .Env.TEMPORAL_BROADCAST_ADDRESS "" }}
+    tls:
+        internode:
+            server:
+                requireClientAuth: true
+                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
+                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                requireClientAuth: true
+                clientCaFiles:
+                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca-chain.pem
+            client:
+                serverName: internode.cluster-x.contoso.com
+                rootCaFiles:
+                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca-chain.pem
+        frontend:
+            server:
+                requireClientAuth: true
+                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
+                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                clientCaFiles:
+                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca-chain.pem
+            client:
+                serverName: internode.cluster-x.contoso.com
+                rootCaFiles:
+                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca-chain.pem
+            hostOverrides:
+                accounting.cluster-x.hq.contoso.com:
+                    certFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.pem
+                    keyFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.key
+                    requireClientAuth: true
+                    clientCaFiles:
+                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-chain.pem
+            hostOverrides:
+                development.cluster-x.hq.contoso.com:
+                    certFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.pem
+                    keyFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.key
+                    requireClientAuth: true
+                    clientCaFiles:
+                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-chain.pem
+    {{- if .Env.STATSD_ENDPOINT }}
+    metrics:
+        statsd:
+            hostPort: {{ .Env.STATSD_ENDPOINT }}
+            prefix: "temporal"
+    {{- else if .Env.PROMETHEUS_ENDPOINT }}
+    metrics:
+        prometheus:
+            timerType: {{ default .Env.PROMETHEUS_TIMER_TYPE "histogram" }}
+            listenAddress: {{ .Env.PROMETHEUS_ENDPOINT }}
+    {{- end }}
+
+{{- $temporalGrpcPort := default .Env.FRONTEND_GRPC_PORT "7233" }}
+services:
+    frontend:
+        rpc:
+            grpcPort: {{ $temporalGrpcPort }}
+            membershipPort: {{ default .Env.FRONTEND_MEMBERSHIP_PORT "6933" }}
+            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+
+    matching:
+        rpc:
+            grpcPort: {{ default .Env.MATCHING_GRPC_PORT "7235" }}
+            membershipPort: {{ default .Env.MATCHING_MEMBERSHIP_PORT "6935" }}
+            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+
+    history:
+        rpc:
+            grpcPort: {{ default .Env.HISTORY_GRPC_PORT "7234" }}
+            membershipPort: {{ default .Env.HISTORY_MEMBERSHIP_PORT "6934" }}
+            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+
+    worker:
+        rpc:
+            grpcPort: {{ default .Env.WORKER_GRPC_PORT "7239" }}
+            membershipPort: {{ default .Env.WORKER_MEMBERSHIP_PORT "6939" }}
+            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+
+clusterMetadata:
+    enableGlobalNamespace: false
+    failoverVersionIncrement: 10
+    masterClusterName: "active"
+    currentClusterName: "active"
+    clusterInformation:
+        active:
+            enabled: true
+            initialFailoverVersion: 1
+            rpcName: "frontend"
+            rpcAddress: {{ (print "127.0.0.1:" $temporalGrpcPort) }}
+
+dcRedirectionPolicy:
+    policy: "noop"
+    toDC: ""
+
+archival:
+  history:
+    state: "enabled"
+    enableRead: true
+    provider:
+      filestore:
+        fileMode: "0666"
+        dirMode: "0766"
+  visibility:
+    state: "enabled"
+    enableRead: true
+    provider:
+      filestore:
+        fileMode: "0666"
+        dirMode: "0766"
+
+namespaceDefaults:
+  archival:
+    history:
+      state: "disabled"
+      URI: "file:///tmp/temporal_archival/development"
+    visibility:
+      state: "disabled"
+      URI: "file:///tmp/temporal_vis_archival/development"
+
+kafka:
+    tls:
+        enabled: false
+    clusters:
+        test:
+            brokers:
+                - {{ default .Env.KAFKA_SEEDS "" }}:9092
+    topics:
+        temporal-visibility-dev:
+            cluster: test
+        temporal-visibility-dev-dlq:
+            cluster: test
+    applications:
+        visibility:
+            topic: temporal-visibility-dev
+            dlq-topic: temporal-visibility-dev-dlq
+
+{{ $publicIp := default .Env.BIND_ON_IP "127.0.0.1" -}}
+{{- $defaultPublicHostPost := (print $publicIp ":" $temporalGrpcPort) -}}
+publicClient:
+    hostPort: {{ default .Env.PUBLIC_FRONTEND_ADDRESS $defaultPublicHostPost }}
+
+dynamicConfigClient:
+    filepath: {{ default .Env.DYNAMIC_CONFIG_FILE_PATH "/etc/temporal/config/dynamicconfig" }}
+    pollInterval: "60s"
