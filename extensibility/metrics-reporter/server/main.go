@@ -25,9 +25,11 @@
 package main
 
 import (
-	metrics_reporter "github.com/temporalio/service-samples/metrics-reporter"
-	"go.temporal.io/server/temporal"
 	"log"
+
+	"go.temporal.io/server/temporal"
+
+	"github.com/temporalio/service-samples/metrics-reporter"
 )
 
 func main() {
@@ -35,7 +37,7 @@ func main() {
 		temporal.ForServices(temporal.Services),
 		temporal.WithConfigLoader("./metrics-reporter/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
-		temporal.WithCustomMetricsReporter(metrics_reporter.NewReporter()),
+		temporal.WithCustomMetricsReporter(metrics.NewReporter()),
 	)
 
 	err := s.Start()

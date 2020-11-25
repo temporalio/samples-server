@@ -20,13 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package metrics_reporter
+package metrics
 
 import (
-	"fmt"
-	"github.com/uber-go/tally"
 	"log"
 	"time"
+
+	"github.com/uber-go/tally"
 )
 
 type (
@@ -90,5 +90,5 @@ func (r myConsoleReporter) ReportHistogramDurationSamples(
 }
 
 func doPrint(src printFormat) {
-	log.Println(fmt.Sprintf("%v\n", src))
+	log.Println(src)
 }
