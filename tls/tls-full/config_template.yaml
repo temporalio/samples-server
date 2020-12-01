@@ -142,19 +142,18 @@ global:
                 rootCaFiles:
                     - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca-chain.pem
             hostOverrides:
-                accounting.cluster-x.hq.contoso.com:
+                accounting.client.contoso.com:
                     certFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.pem
                     keyFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-chain.pem
-            hostOverrides:
-                development.cluster-x.hq.contoso.com:
+                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-accounting-chain.pem
+                development.client.contoso.com:
                     certFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.pem
                     keyFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-chain.pem
+                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-development-chain.pem
     {{- if .Env.STATSD_ENDPOINT }}
     metrics:
         statsd:

@@ -39,21 +39,24 @@ generate_cert server-intermediate-ca $CLUSTER_DIR/ca $CLUSTER_DIR/ca/server-root
 echo Generate a private key and a certificate for internode communication 
 generate_cert cluster-internode $CLUSTER_DIR/internode $CLUSTER_DIR/ca/server-intermediate-ca req_ext
 
-echo Generate a private key and a server certificate for accounting namespace client
+echo Generate a private key and a server certificate for accounting namespace
 generate_cert cluster-accounting $CLUSTER_DIR/accounting $CLUSTER_DIR/ca/server-intermediate-ca req_ext
 
-echo Generate a private key and a server certificate for development namespace client
+echo Generate a private key and a server certificate for development namespace
 generate_cert cluster-development $CLUSTER_DIR/development $CLUSTER_DIR/ca/server-intermediate-ca req_ext
 
 
 echo Generate a private key and a certificate for client root CA
 generate_root_ca_cert client-root-ca $CLIENT_DIR/ca
 
-echo Generate a private key and a certificate for client intermediate CA
-generate_cert client-intermediate-ca $CLIENT_DIR/ca $CLIENT_DIR/ca/client-root-ca v3_ca
+echo Generate a private key and a certificate for client intermediate CA for accounting namespace
+generate_cert client-intermediate-ca-accounting $CLIENT_DIR/ca $CLIENT_DIR/ca/client-root-ca v3_ca
+
+echo Generate a private key and a certificate for client intermediate CA for development namespace
+generate_cert client-intermediate-ca-development $CLIENT_DIR/ca $CLIENT_DIR/ca/client-root-ca v3_ca
 
 echo Generate a private key and a certificate for accounting namespace client 
-generate_cert client-accounting $CLIENT_DIR/accounting $CLIENT_DIR/ca/client-intermediate-ca req_ext
+generate_cert client-accounting-namespace $CLIENT_DIR/accounting $CLIENT_DIR/ca/client-intermediate-ca-accounting req_ext
 
 echo Generate a private key and a certificate for development namespace client 
-generate_cert client-development $CLIENT_DIR/development $CLIENT_DIR/ca/client-intermediate-ca req_ext
+generate_cert client-development-namespace $CLIENT_DIR/development $CLIENT_DIR/ca/client-intermediate-ca-development req_ext
