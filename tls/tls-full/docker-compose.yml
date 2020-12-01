@@ -1,0 +1,66 @@
+version: '3.5'
+
+services:
+  cassandra:
+    image: cassandra:3.11
+    ports:
+      - "9042:9042"
+  temporal:
+    image: temporalio/auto-setup
+    ports:
+      - "7233:7233"
+    volumes:
+      - ${DYNAMIC_CONFIG_DIR:-../config/dynamicconfig}:/etc/temporal/config/dynamicconfig
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+      - ./config_template.yaml:/etc/temporal/config/config_template.yaml
+    environment:
+      - "CASSANDRA_SEEDS=cassandra"
+      - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
+      - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
+    depends_on:
+      - cassandra
+  temporal-cli-admin:
+    image: temporalio/admin-tools
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+    environment:
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca-chain.pem"
+      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
+      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.key"
+      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_CLI_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
+    depends_on:
+      - temporal
+  temporal-cli-accounting:
+    image: temporalio/admin-tools
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+    environment:
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca-chain.pem"
+      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace-chain.pem"
+      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace.key"
+      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_CLI_TLS_SERVER_NAME=accounting.cluster-x.contoso.com"
+    depends_on:
+      - temporal
+  temporal-cli-development:
+    image: temporalio/admin-tools
+    stdin_open: true
+    tty: true
+    volumes:
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+    environment:
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca-chain.pem"
+      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
+      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
+      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_CLI_TLS_SERVER_NAME=development.cluster-x.contoso.com"
+    depends_on:
+      - temporal
