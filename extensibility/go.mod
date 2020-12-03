@@ -7,6 +7,5 @@ require (
 	// TODO: replace this with latest server release to pick up
 	// 	extensibility support change.
 	// 	CommitID: 3e11440de58d05583aa04208d0d89b5650ea82e7
-	go.temporal.io/server v1.1.0
-	google.golang.org/grpc v1.33.0 // indirect
+	go.temporal.io/server v1.1.1-0.20201203021147-dfaf475f62a5
 )
