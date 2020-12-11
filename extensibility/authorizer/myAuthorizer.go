@@ -58,7 +58,7 @@ func (a *myAuthorizer) Authorize(_ context.Context, claims *authorization.Claims
 
 	// For other namespaces, deny "UpdateNamespace" API unless the caller has a writer role in it
 	if target.APIName == "UpdateNamespace" {
-		if claims.Namespaces != nil && claims.Namespaces[target.Namespace] & authorization.RoleWriter != 0 {
+		if claims.Namespaces[target.Namespace] & authorization.RoleWriter != 0 {
 			return decisionAllow, nil
 		} else {
 			return decisionDeny, nil
