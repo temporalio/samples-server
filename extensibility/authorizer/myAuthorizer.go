@@ -45,9 +45,24 @@ func (a *myAuthorizer) Authorize(_ context.Context, claims *authorization.Claims
 		return decisionAllow, nil
 	}
 
-	// For other namespaces, deny "UpdateNamespace" API
+	// Allow all calls except UpdateNamespace through when claim mapper isn't invoked.
+	// Claim mapper is skipped unless TLS is configured or an auth token is passed
+	if claims == nil && target.APIName != "UpdateNamespace" {
+		return decisionAllow, nil
+	}
+
+	// Allow all operations for system-level admins and writers
+	if claims.System & (authorization.RoleAdmin | authorization.RoleWriter) != 0 {
+		return decisionAllow, nil
+	}
+
+	// For other namespaces, deny "UpdateNamespace" API unless the caller has a writer role in it
 	if target.APIName == "UpdateNamespace" {
-		return decisionDeny, nil
+		if claims.Namespaces != nil && claims.Namespaces[target.Namespace] & authorization.RoleWriter != 0 {
+			return decisionAllow, nil
+		} else {
+			return decisionDeny, nil
+		}
 	}
 
 	// Allow all other requests

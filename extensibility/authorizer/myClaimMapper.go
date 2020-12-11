@@ -2,8 +2,6 @@
 //
 // Copyright (c) 2020 Temporal Technologies Inc.  All rights reserved.
 //
-// Copyright (c) 2020 Uber Technologies, Inc.
-//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
@@ -22,39 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package authorizer
 
 import (
-	"log"
 
 	"go.temporal.io/server/common/authorization"
 	"go.temporal.io/server/common/service/config"
-	"go.temporal.io/server/temporal"
-
-	"github.com/temporalio/service-samples/authorizer"
 )
 
-func main(){
+type myClaimMapper struct{}
 
-	cfg, err := config.LoadConfig("development", "./config", "")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s := temporal.NewServer(
-		temporal.ForServices(temporal.Services),
-		temporal.WithConfig(cfg),
-		temporal.InterruptOn(temporal.InterruptCh()),
-		temporal.WithClaimMapper(func(cfg *config.Config) authorization.ClaimMapper {
-			return authorizer.NewMyClaimMapper(cfg)
-		}),
-		temporal.WithAuthorizer(authorizer.NewMyAuthorizer()),
-	)
-
-	err = s.Start()
-	if err != nil{
-		log.Fatal(err)
-	}
-
-	log.Println("All services are stopped.")
+func NewMyClaimMapper(_ *config.Config) authorization.ClaimMapper {
+	return &myClaimMapper{}
 }
+
+func (c myClaimMapper) GetClaims(authInfo *authorization.AuthInfo) (*authorization.Claims, error) {
+	claims := authorization.Claims{}
+
+	if authInfo.TLSConnection != nil {
+		// Add claims based on client's TLS certificate
+		claims.Subject = authInfo.TLSSubject.CommonName
+	}
+	if authInfo.AuthToken != "" {
+		// Extract claims from the auth token and translate them into Temporal roles for the caller
+		// Here we'll simply hardcode some as an example
+		claims.System = authorization.RoleWriter // cluster-level admin
+		claims.Namespaces = make(map[string]authorization.Role)
+		claims.Namespaces["foo"] = authorization.RoleReader // caller has a reader role for the "foo" namespace
+	}
+
+	return &claims, nil
+}
+
