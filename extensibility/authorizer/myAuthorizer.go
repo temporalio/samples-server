@@ -41,11 +41,14 @@ func (a *myAuthorizer) Authorize(_ context.Context, claims *authorization.Claims
 	target *authorization.CallTarget) (authorization.Result, error) {
 
 	// Allow all operations within "temporal-system" namespace
+	// DON'T DO THIS IN A PRODUCTION ENVIRONMENT
+	// IN PRODUCTION, only allow calls from properly authenticated and authorized callers
+	// We are taking a shortcut in the sample because we don't have TLS or a auth token
 	if target.Namespace == "temporal-system" {
 		return decisionAllow, nil
 	}
 
-	// Allow all calls except UpdateNamespace through when claim mapper isn't invoked.
+	// Allow all calls except UpdateNamespace through when claim mapper isn't invoked
 	// Claim mapper is skipped unless TLS is configured or an auth token is passed
 	if claims == nil && target.APIName != "UpdateNamespace" {
 		return decisionAllow, nil
