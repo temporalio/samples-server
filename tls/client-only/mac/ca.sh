@@ -2,20 +2,15 @@
 
 echo "Creating the CSR (certificate signing request)"
 
-## This will also be used as the DNS for the end-entity.
+## This will also be used as part of the DNS for the CA and end-entity in addition to the organization setting.
 echo "What is your company name?:"
 read COMPANY_NAME
 
 # Lower case company name for DNS.
 CN=$(echo $COMPANY_NAME | awk '{print tolower($0)}')
 
-#RANDLETTER=$(C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 4 ; echo '')
-RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
-
 ## Return a random stream of data, fold makes a new line every 4 characters, head will take the first line. 
-#RANDLETTER=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
-
-
+RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
 DNS_ROOT="client.root.${CN}.${RANDLETTER}"
 
 touch ca.conf
