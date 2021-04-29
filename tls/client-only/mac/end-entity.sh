@@ -12,7 +12,7 @@ IFS="." read -a strarr <<< "${DNS}"
 CN="${strarr[3]}"
 
 # Return a random stream of data, fold makes a new line every 4 characters, head will take the first line. 
-RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
+RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
 
 # Enter this as the DNS. 
 DNS_END_ENTITY="client.endentity.${CN}.${RANDLETTER}"

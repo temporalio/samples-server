@@ -9,7 +9,7 @@ read COMPANY_NAME
 CN="${COMPANY_NAME,,}"
 
 ## Return a random stream of data, fold makes a new line every 4 characters, head will take the first line. 
-RANDLETTER=$(cat /dev/urandom | busybox tr -dc 'a-zA-Z0-9' | busybox fold -w 4 | busybox head -n 1)
+RANDLETTER=$(cat /dev/urandom | busybox tr -dc 'a-z0-9' | busybox fold -w 4 | busybox head -n 1)
 
 DNS_ROOT="client.root.${CN}.${RANDLETTER}"
 

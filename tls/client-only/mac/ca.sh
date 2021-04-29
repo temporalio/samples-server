@@ -10,7 +10,7 @@ read COMPANY_NAME
 CN=$(echo $COMPANY_NAME | awk '{print tolower($0)}')
 
 ## Return a random stream of data, fold makes a new line every 4 characters, head will take the first line. 
-RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 4 | head -n 1)
+RANDLETTER=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 4 | head -n 1)
 DNS_ROOT="client.root.${CN}.${RANDLETTER}"
 
 touch ca.conf
