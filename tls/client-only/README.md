@@ -1,6 +1,6 @@
 ### Overview
 
-These scripts generate only the client-side certificates, along with their keys and configuration files. Alpine Linux and Mac are both supported in their given folders. 
+These scripts generate only the client-side certificates, along with their keys and configuration files. Alpine Linux and Mac are both supported in their given folders. If you're having trouble with these scripts in your local environment, take a look at our [Docker Image for generation client-side certificates](https://hub.docker.com/r/temporalio/client-certificate-generation). 
 
 ### User Instructions 
 
