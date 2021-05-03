@@ -38,6 +38,5 @@ hash --> will automatically follow the guidelines in RFC3280
 ### Notes
 - The generated certificates are hard-coded as valid for 365 days
 - This requires two separate scripts to run to make it possible to both create a variable number of end-entity certificates at any point in time. 
-- It's also worth noting here that we are generating configuration files as opposed to setting the entered values from arguments because the domain name is unable to be set as a param when generating an x509 cert, at present. 
 
 [1]: https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html
