@@ -38,5 +38,6 @@ hash --> will automatically follow the guidelines in RFC3280
 ### Notes
 - The generated certificates are hard-coded as valid for 365 days
 - This requires two separate scripts to run to make it possible to both create a variable number of end-entity certificates at any point in time. 
+- These certificates should be used only to inform that a connection can be made, and is not to be used in production. 
 
 [1]: https://www.openssl.org/docs/man1.1.1/man5/x509v3_config.html
