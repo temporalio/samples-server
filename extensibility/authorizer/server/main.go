@@ -28,7 +28,7 @@ import (
 	"log"
 
 	"go.temporal.io/server/common/authorization"
-	"go.temporal.io/server/common/service/config"
+	"go.temporal.io/server/common/config"
 	"go.temporal.io/server/temporal"
 
 	"github.com/temporalio/service-samples/authorizer"

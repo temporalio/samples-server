@@ -25,7 +25,7 @@ package authorizer
 import (
 
 	"go.temporal.io/server/common/authorization"
-	"go.temporal.io/server/common/service/config"
+	"go.temporal.io/server/common/config"
 )
 
 type myClaimMapper struct{}
