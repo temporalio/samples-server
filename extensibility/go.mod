@@ -7,5 +7,5 @@ require (
 	// TODO: replace this with latest server release to pick up
 	// 	extensibility support change.
 	// 	CommitID: 3e11440de58d05583aa04208d0d89b5650ea82e7
-	go.temporal.io/server v1.4.1
+	go.temporal.io/server v1.9.2
 )
