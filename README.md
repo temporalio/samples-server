@@ -2,8 +2,8 @@
 These samples show how to customize Temporal server for specific production scenarios.
 
 Learn more about Temporal at:
-* Documentation: https://docs.temporal.io/docs/overview/
-* Main repository: https://github.com/temporalio/temporal,
+* Documentation: https://docs.temporal.io
+* Main repository: https://github.com/temporalio/temporal
 * Go SDK: https://github.com/temporalio/sdk-go
 * Java SDK: https://github.com/temporalio/sdk-java
 
