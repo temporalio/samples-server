@@ -15,24 +15,24 @@ critical --> ["If critical is present then the extension will be critical."][1]
 
 [v3_ca]
 
-authorityKeyIdentifier = keyid:always,issuer
-keyid:always,issuer --> an attempt is made to copy the subject key identifier from the parent certificate. If the value "always" is present then an error is returned if the option fails.
+authorityKeyIdentifier = keyid:always,issuer</br>
+keyid:always,issuer --> an attempt is made to copy the subject key identifier from the parent certificate. If the value "always" is present then an error is returned if the option fails.</br>
 [source][1]
 
-basicConstraints = critical,CA:TRUE,pathlen:0
-CA:TRUE --> This is a certificate authority 
-pathlen:0 --> "indicates the maximum number of CAs that can appear below this one in a chain. So if you have a CA with a pathlen of zero it can only be used to sign end user certificates and not further CAs."
-[source][1]
+basicConstraints = critical,CA:TRUE,pathlen:0</br>
+CA:TRUE --> This is a certificate authority</br>
+pathlen:0 --> "indicates the maximum number of CAs that can appear below this one in a chain. So if you have a CA with a pathlen of zero it can only be used to sign end user certificates and not further CAs."</br>
+[source][1]</br>
 [source](https://stackoverflow.com/questions/6616470/certificates-basic-constraints-path-length/6617814#6617814)
 
-keyUsage = critical,digitalSignature,cRLSign,keyCertSign
-digitalSignature --> Certificate may be used to apply a digital signature
-cRLSign --> Subject public key is to verify signatures on revocation information, such as a CRL
-keyCertSign --> Subject public key is used to verify signatures on certificates
+keyUsage = critical,digitalSignature,cRLSign,keyCertSign</br>
+digitalSignature --> Certificate may be used to apply a digital signature</br>
+cRLSign --> Subject public key is to verify signatures on revocation information, such as a CRL</br>
+keyCertSign --> Subject public key is used to verify signatures on certificates</br>
 [source](https://superuser.com/questions/738612/openssl-ca-keyusage-extension)
 
-subjectKeyIdentifier = hash
-hash --> will automatically follow the guidelines in RFC3280
+subjectKeyIdentifier = hash</br>
+hash --> will automatically follow the guidelines in RFC3280</br>
 [source][1]
 
 ### Notes
