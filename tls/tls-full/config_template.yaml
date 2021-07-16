@@ -137,10 +137,6 @@ global:
                 keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
                 clientCaFiles:
                     - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
-            client:
-                serverName: internode.cluster-x.contoso.com
-                rootCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
             hostOverrides:
                 accounting.cluster-x.contoso.com:
                     certFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.pem
@@ -154,6 +150,13 @@ global:
                     requireClientAuth: true
                     clientCaFiles:
                         - /etc/temporal/config/certs/client/ca/client-intermediate-ca-development.pem
+        systemWorker:
+            certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
+            keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+            client:
+                serverName: internode.cluster-x.contoso.com
+                rootCaFiles:
+                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
     {{- if .Env.STATSD_ENDPOINT }}
     metrics:
         statsd:
