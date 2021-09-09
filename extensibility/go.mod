@@ -8,4 +8,7 @@ require (
 	// 	extensibility support change.
 	// 	CommitID: 3e11440de58d05583aa04208d0d89b5650ea82e7
 	go.temporal.io/server v1.9.2
+
 )
+
+replace go.temporal.io/server v1.9.2 => ../../temporal
