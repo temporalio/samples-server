@@ -6,7 +6,7 @@ services:
     ports:
       - "9042:9042"
   temporal:
-    image: temporalio/auto-setup
+    image: temporalio/auto-setup:${SERVER_TAG:-latest}
     ports:
       - "7233:7233"
     volumes:
@@ -26,7 +26,7 @@ services:
     depends_on:
       - cassandra
   temporal-web:
-    image: temporalio/web
+    image: temporalio/web:${WEB_TAG:-latest}
     ports:
       - "8088:8088"
     volumes:
@@ -41,7 +41,7 @@ services:
     depends_on:
       - temporal
   temporal-cli-admin:
-    image: temporalio/admin-tools
+    image: temporalio/admin-tools:${SERVER_TAG:-latest}
     stdin_open: true
     tty: true
     volumes:
@@ -56,7 +56,7 @@ services:
     depends_on:
       - temporal
   temporal-cli-accounting:
-    image: temporalio/admin-tools
+    image: temporalio/admin-tools:${SERVER_TAG:-latest}
     stdin_open: true
     tty: true
     volumes:
@@ -71,7 +71,7 @@ services:
     depends_on:
       - temporal
   temporal-cli-development:
-    image: temporalio/admin-tools
+    image: temporalio/admin-tools:${SERVER_TAG:-latest}
     stdin_open: true
     tty: true
     volumes:
