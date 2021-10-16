@@ -15,6 +15,7 @@ services:
     environment:
       - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
+      - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
       - "TEMPORAL_TLS_SERVER_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_SERVER_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
       - "TEMPORAL_TLS_SERVER_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
@@ -27,7 +28,12 @@ services:
       - "TEMPORAL_TLS_FRONTEND_SERVER_NAME=tls-sample"
       - "TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION=false"
       - "TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION=false"
-      - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
+      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
+      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
+      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_CLI_TLS_SERVER_NAME=tls-sample"
     depends_on:
       - cassandra
   temporal-web:
