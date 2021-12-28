@@ -18,3 +18,6 @@ openssl x509 -req -in $CERTS_DIR/cluster.csr -CA $CERTS_DIR/ca.cert -CAkey $CERT
 openssl genrsa -out $CERTS_DIR/client.key 4096
 openssl req -new -key $CERTS_DIR/client.key -out $CERTS_DIR/client.csr -config client-cert.conf
 openssl x509 -req -in $CERTS_DIR/client.csr -CA $CERTS_DIR/ca.cert -CAkey $CERTS_DIR/ca.key -CAcreateserial -out $CERTS_DIR/client.pem -days 365 -sha256 -extfile client-cert.conf -extensions req_ext
+# Export to .pfx 
+# "-keypbe NONE -certpbe NONE -passout pass:" specifies an unencrypted archive
+openssl pkcs12 -export -out $CERTS_DIR/client.pfx -inkey $CERTS_DIR/client.key -in $CERTS_DIR/client.pem -keypbe NONE -certpbe NONE -passout pass:
