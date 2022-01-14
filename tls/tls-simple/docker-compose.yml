@@ -51,6 +51,21 @@ services:
       - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
     depends_on:
       - temporal
+  temporal-ui:
+    image: temporaliotest/ui:${UI_TAG:-latest}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+    environment:
+      - "TEMPORAL_ADDRESS=temporal:7233"
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
+      - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
+    depends_on:
+      - temporal
   temporal-admin-tools:
     image: temporalio/admin-tools:${SERVER_TAG:-latest}
     stdin_open: true
