@@ -123,7 +123,6 @@ global:
                 requireClientAuth: true
                 certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
                 keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
-                requireClientAuth: true
                 clientCaFiles:
                     - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
             client:
