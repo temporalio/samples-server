@@ -31,25 +31,25 @@ import (
 	"go.temporal.io/server/common/metrics"
 	"go.temporal.io/server/temporal"
 
-	metrics_reporter "github.com/temporalio/service-samples/metrics-reporter"
+	metrics_otel_reporter "github.com/temporalio/service-samples/metrics-otel-reporter"
 )
 
 func main() {
 	ctx := context.Background()
 	logger := log.NewCLILogger()
-	mustProvider, err := metrics_reporter.NewOpentelemeteryReporter(logger)
+	mustProvider, err := metrics_otel_reporter.NewOpentelemeteryReporter(logger)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 
-	reporter, err := metrics.NewOpentelemeteryReporter(logger, &metrics.ClientConfig{}, mustProvider)
-	if err != nil {
-		logger.Fatal(err.Error())
+	reporter, err2 := metrics.NewOpentelemeteryReporter(logger, &metrics.ClientConfig{}, mustProvider)
+	if err2 != nil {
+		logger.Fatal(err2.Error())
 	}
 
 	s := temporal.NewServer(
 		temporal.ForServices(temporal.Services),
-		temporal.WithConfigLoader("./metrics-reporter/config", "development", ""),
+		temporal.WithConfigLoader("./metrics-otel-reporter/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithCustomMetricsReporter(reporter),
 	)
