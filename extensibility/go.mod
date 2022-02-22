@@ -2,9 +2,6 @@ module github.com/temporalio/service-samples
 
 go 1.17
 
-// todo: remove before merge. Keeping for PR example. Need server changes.
-replace go.temporal.io/server => ../../temporal
-
 require (
 	github.com/uber-go/tally v3.3.17+incompatible
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v0.27.0
@@ -14,7 +11,7 @@ require (
 	// TODO: replace this with latest server release to pick up
 	// 	extensibility support change.
 	// 	CommitID: 3e11440de58d05583aa04208d0d89b5650ea82e7
-	go.temporal.io/server v1.15.0
+	go.temporal.io/server v1.15.1-0.20220220200917-61b9b65744e4
 )
 
 require (
