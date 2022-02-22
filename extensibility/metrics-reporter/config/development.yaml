@@ -17,10 +17,8 @@ global:
     broadcastAddress: "127.0.0.1"
   pprof:
     port: 7936
-# Tags can be configured per service in config file
-#  metrics:
-#    tags:
-#      test: "testvalue"
+  metrics:
+    tags:
 
 services:
   frontend:
@@ -105,8 +103,4 @@ kafka:
 
 publicClient:
   hostPort: "localhost:7233"
-
-dynamicConfigClient:
-  filepath: "./config/dynamicconfig/development.yaml"
-  pollInterval: "10s"
 

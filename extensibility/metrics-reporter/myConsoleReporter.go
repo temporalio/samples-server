@@ -23,10 +23,11 @@
 package metrics
 
 import (
+	"fmt"
 	"log"
 	"time"
 
-	"github.com/uber-go/tally"
+	"github.com/uber-go/tally/v4"
 )
 
 type (
@@ -91,4 +92,5 @@ func (r myConsoleReporter) ReportHistogramDurationSamples(
 
 func doPrint(src printFormat) {
 	log.Println(src)
+	fmt.Println(src)
 }

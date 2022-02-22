@@ -26,18 +26,25 @@ package main
 
 import (
 	"log"
+	"time"
 
+	"github.com/uber-go/tally/v4"
 	"go.temporal.io/server/temporal"
+	servermetrics 	"go.temporal.io/server/common/metrics"
 
 	"github.com/temporalio/service-samples/metrics-reporter"
 )
 
 func main() {
+	options := tally.ScopeOptions{Reporter: metrics.NewReporter()}
+	scope, _ := tally.NewRootScope(options, time.Second)
+	reporter := servermetrics.NewTallyReporter(scope, &servermetrics.ClientConfig{})
+
 	s := temporal.NewServer(
 		temporal.ForServices(temporal.Services),
 		temporal.WithConfigLoader("./metrics-reporter/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
-		temporal.WithCustomMetricsReporter(metrics.NewReporter()),
+		temporal.WithCustomMetricsReporter(reporter),
 	)
 
 	err := s.Start()
