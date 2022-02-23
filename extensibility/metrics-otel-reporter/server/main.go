@@ -30,9 +30,28 @@ import (
 	"go.temporal.io/server/common/log"
 	"go.temporal.io/server/common/metrics"
 	"go.temporal.io/server/temporal"
+	"google.golang.org/grpc"
 
 	metrics_otel_reporter "github.com/temporalio/service-samples/metrics-otel-reporter"
 )
+
+func NewCustomInterceptor(scope metrics.UserScope) grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (resp interface{}, err error) {
+		scope.AddCounter(
+			"CustomInterceptorInvoked",
+			1,
+		)
+		return handler(
+			ctx,
+			req,
+		)
+	}
+}
 
 func main() {
 	ctx := context.Background()
@@ -47,11 +66,14 @@ func main() {
 		logger.Fatal(err2.Error())
 	}
 
+	customInterceptor := NewCustomInterceptor(reporter.UserScope())
+
 	s := temporal.NewServer(
 		temporal.ForServices(temporal.Services),
 		temporal.WithConfigLoader("./metrics-otel-reporter/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithCustomMetricsReporter(reporter),
+		temporal.WithChainedFrontendGrpcInterceptors(customInterceptor),
 	)
 
 	mustProvider.GetMeterMust().NewInt64Counter("test").Add(ctx, 11)
@@ -61,3 +83,4 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 }
+
