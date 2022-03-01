@@ -31,6 +31,9 @@ generate_cert() {
     then
       cat $2/$1.pem $3.pem > $2/$1-chain.pem
     fi
+    # Export to .pfx
+    # "-keypbe NONE -certpbe NONE -passout pass:" exports into an unencrypted .pfx archive
+    openssl pkcs12 -export -out $2/$1.pfx -inkey $2/$1.key -in $2/$1.pem -keypbe NONE -certpbe NONE -passout pass:
 }
 
 echo Generate a private key and a certificate for server root CA

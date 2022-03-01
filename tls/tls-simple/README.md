@@ -1,6 +1,7 @@
 ### TLS
 
 This samples demonstrates how to configure Transport Layer Security (TLS) to secure network communication with and within Temporal cluster.
+The generated certificates are in PKCS1 and PKCS12 format.
 
 ### Steps to run this sample
 

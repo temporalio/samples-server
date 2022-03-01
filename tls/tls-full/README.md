@@ -2,6 +2,7 @@
 
 This sample demonstrates how to configure Transport Layer Security (TLS) to secure network communication with and within a Temporal cluster when using intermediate CAs and different certificate chains for cluster and clients.
 It also shows how different clients can be given different server certificates when connecting to the same cluster using different server names.
+The generated certificates are in PKCS1 and PKCS12 (client-only) format.
 
 ### Steps to run this sample
 
