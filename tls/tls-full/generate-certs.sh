@@ -24,16 +24,19 @@ generate_root_ca_cert() {
 }
 
 generate_cert() {
-    openssl genrsa -out $2/$1.key 4096
-    openssl req -new -key $2/$1.key -out $TEMP_DIR/$1.csr -config $1.conf
+    openssl req -newkey rsa:4096 -nodes -keyout "$2/$1.key" -out "$TEMP_DIR/$1.csr" -config "$1.conf"
     openssl x509 -req -in $TEMP_DIR/$1.csr -CA $3.pem -CAkey $3.key -CAcreateserial -out $2/$1.pem -days 365 -extfile $1.conf -extensions $4
+    CHAIN_FILE="$2/$1.pem"
     if [[ $5 != 'no_chain' ]]
     then
       cat $2/$1.pem $3.pem > $2/$1-chain.pem
+      CHAIN_FILE="$2/$1-chain.pem"
     fi
-    # Export to .pfx
-    # "-keypbe NONE -certpbe NONE -passout pass:" exports into an unencrypted .pfx archive
-    openssl pkcs12 -export -out $2/$1.pfx -inkey $2/$1.key -in $2/$1.pem -keypbe NONE -certpbe NONE -passout pass:
+
+      # Export to .pfx
+      # "-keypbe NONE -certpbe NONE -passout pass:" exports into an unencrypted .pfx archive
+      openssl pkcs12 -export -out $2/$1.pfx -inkey $2/$1.key -in $CHAIN_FILE -keypbe NONE -certpbe NONE -passout pass:  
+
 }
 
 echo Generate a private key and a certificate for server root CA
