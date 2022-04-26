@@ -15,8 +15,7 @@ openssl req -new -key $CERTS_DIR/cluster.key -out $CERTS_DIR/cluster.csr -config
 openssl x509 -req -in $CERTS_DIR/cluster.csr -CA $CERTS_DIR/ca.cert -CAkey $CERTS_DIR/ca.key -CAcreateserial -out $CERTS_DIR/cluster.pem -days 365 -sha256 -extfile cluster-cert.conf -extensions req_ext
 
 # Generate a private key and a certificate for clients
-openssl genrsa -out $CERTS_DIR/client.key 4096
-openssl req -new -key $CERTS_DIR/client.key -out $CERTS_DIR/client.csr -config client-cert.conf
+openssl req -newkey rsa:4096 -nodes -keyout "$CERTS_DIR/client.key" -out "$CERTS_DIR/client.csr" -config client-cert.conf
 openssl x509 -req -in $CERTS_DIR/client.csr -CA $CERTS_DIR/ca.cert -CAkey $CERTS_DIR/ca.key -CAcreateserial -out $CERTS_DIR/client.pem -days 365 -sha256 -extfile client-cert.conf -extensions req_ext
 # Export to .pfx 
 # "-keypbe NONE -certpbe NONE -passout pass:" specifies an unencrypted archive
