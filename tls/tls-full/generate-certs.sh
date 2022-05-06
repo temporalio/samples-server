@@ -20,12 +20,12 @@ mkdir $TEMP_DIR
 
 generate_root_ca_cert() {
     openssl genrsa -out $2/$1.key 4096
-    openssl req -new -x509 -key $2/$1.key -config $1.conf -days 365 -out $2/$1.pem
+    openssl req -new -x509 -key $2/$1.key -sha256 -config $1.conf -days 365 -out $2/$1.pem
 }
 
 generate_cert() {
-    openssl req -newkey rsa:4096 -nodes -keyout "$2/$1.key" -out "$TEMP_DIR/$1.csr" -config "$1.conf"
-    openssl x509 -req -in $TEMP_DIR/$1.csr -CA $3.pem -CAkey $3.key -CAcreateserial -out $2/$1.pem -days 365 -extfile $1.conf -extensions $4
+    openssl req -newkey rsa:4096 -nodes -keyout "$2/$1.key" -sha256 -out "$TEMP_DIR/$1.csr" -config "$1.conf"
+    openssl x509 -req -in $TEMP_DIR/$1.csr -CA $3.pem -CAkey $3.key -sha256 -CAcreateserial -out $2/$1.pem -days 365 -extfile $1.conf -extensions $4
     CHAIN_FILE="$2/$1.pem"
     if [[ $5 != 'no_chain' ]]
     then
