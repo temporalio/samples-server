@@ -33,6 +33,7 @@ subjectAltName = @alt_names
 
 [dn]
 O = $CN
+CN = $CN client ${UNIQUE_NAME}
 
 [alt_names]
 DNS.1 = $DNS_END_ENTITY
