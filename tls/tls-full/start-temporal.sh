@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # TEMPORAL_TLS_CERTS_DIR is used in docker-compose.yml to point 
 # to the location of generated test certificates within the container
 export TEMPORAL_TLS_CERTS_DIR=/etc/temporal/config/certs
