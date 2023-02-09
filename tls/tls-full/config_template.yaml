@@ -121,34 +121,34 @@ global:
         internode:
             server:
                 requireClientAuth: true
-                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
-                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                certFile: /certs/cluster/internode/cluster-internode.pem
+                keyFile: /certs/cluster/internode/cluster-internode.key
                 clientCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
             client:
                 serverName: internode.cluster-x.contoso.com
                 rootCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
         frontend:
             server:
                 requireClientAuth: true
-                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
-                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                certFile: /certs/cluster/internode/cluster-internode.pem
+                keyFile: /certs/cluster/internode/cluster-internode.key
                 clientCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
             hostOverrides:
                 accounting.cluster-x.contoso.com:
-                    certFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.pem
-                    keyFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting.key
+                    certFile: /certs/cluster/accounting/cluster-accounting-chain.pem
+                    keyFile: /certs/cluster/accounting/cluster-accounting.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-accounting.pem
+                        - /certs/client/ca/client-intermediate-ca-accounting.pem
                 development.cluster-x.contoso.com:
-                    certFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.pem
-                    keyFile: /etc/temporal/config/certs/cluster/development/cluster-development.key
+                    certFile: /certs/cluster/development/cluster-development-chain.pem
+                    keyFile: /certs/cluster/development/cluster-development.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-development.pem
+                        - /certs/client/ca/client-intermediate-ca-development.pem
     {{- if .Env.STATSD_ENDPOINT }}
     metrics:
         statsd:
