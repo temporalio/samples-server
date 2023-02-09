@@ -14,6 +14,7 @@ services:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
       - ./config_template.yaml:/etc/temporal/config/config_template.yaml
     environment:
+      - "SERVICES=frontend:matching:history:worker:internal-frontend"
       - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
       - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
