@@ -17,7 +17,6 @@ services:
       - "SERVICES=frontend:matching:history:worker:internal-frontend"
       - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
-      - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
       - "TEMPORAL_CLI_ADDRESS=temporal:7233"
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
