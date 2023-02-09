@@ -38,3 +38,20 @@ cluster-internode    |              |                         |                 
 ./start-temporal.sh
 ```
 
+3. You can use docker to enter the cli containers and use `tctl` like this (in another terminal):
+
+```bash
+docker exec -it tls-full-temporal-cli-admin-1 bash
+docker exec -it tls-full-temporal-cli-development-1 bash
+docker exec -it tls-full-temporal-cli-accounting-1 bash
+```
+
+Environment variables are set up to provide the `development` and `accounting` containers with access to namespaces with the respective names.
+(You'll have to create them first with `tctl namespace register`.)
+
+4. But you might notice that all three containers actually have identical (full admin-level) permissions!
+That's because there's no ClaimMapper or Authorizer actually examining the client certs to determine permissions.
+To actually enforce namespace access, you'll have to build the server with a custom ClaimMapper, and turn on the default Authorizer also.
+You can look in [tlsClaimMapper.go](./tlsClaimMapper.go) for an example that will work with the certs in this sample,
+and in [the authorizer sample](../../extensibility/authorizer/) for more instructions on how to build a custom server.
+
