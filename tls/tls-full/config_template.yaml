@@ -121,41 +121,34 @@ global:
         internode:
             server:
                 requireClientAuth: true
-                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
-                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                certFile: /certs/cluster/internode/cluster-internode.pem
+                keyFile: /certs/cluster/internode/cluster-internode.key
                 clientCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
             client:
                 serverName: internode.cluster-x.contoso.com
                 rootCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
         frontend:
             server:
                 requireClientAuth: true
-                certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
-                keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
+                certFile: /certs/cluster/internode/cluster-internode.pem
+                keyFile: /certs/cluster/internode/cluster-internode.key
                 clientCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                    - /certs/cluster/ca/server-intermediate-ca.pem
             hostOverrides:
                 accounting.cluster-x.contoso.com:
-                    certFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting-chain.pem
-                    keyFile: /etc/temporal/config/certs/cluster/accounting/cluster-accounting.key
+                    certFile: /certs/cluster/accounting/cluster-accounting-chain.pem
+                    keyFile: /certs/cluster/accounting/cluster-accounting.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-accounting.pem
+                        - /certs/client/ca/client-intermediate-ca-accounting.pem
                 development.cluster-x.contoso.com:
-                    certFile: /etc/temporal/config/certs/cluster/development/cluster-development-chain.pem
-                    keyFile: /etc/temporal/config/certs/cluster/development/cluster-development.key
+                    certFile: /certs/cluster/development/cluster-development-chain.pem
+                    keyFile: /certs/cluster/development/cluster-development.key
                     requireClientAuth: true
                     clientCaFiles:
-                        - /etc/temporal/config/certs/client/ca/client-intermediate-ca-development.pem
-        systemWorker:
-            certFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.pem
-            keyFile: /etc/temporal/config/certs/cluster/internode/cluster-internode.key
-            client:
-                serverName: internode.cluster-x.contoso.com
-                rootCaFiles:
-                    - /etc/temporal/config/certs/cluster/ca/server-intermediate-ca.pem
+                        - /certs/client/ca/client-intermediate-ca-development.pem
     {{- if .Env.STATSD_ENDPOINT }}
     metrics:
         statsd:
@@ -174,6 +167,12 @@ services:
         rpc:
             grpcPort: {{ $temporalGrpcPort }}
             membershipPort: {{ default .Env.FRONTEND_MEMBERSHIP_PORT "6933" }}
+            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+
+    internal-frontend:
+        rpc:
+            grpcPort: {{ default .Env.INTERNAL_FRONTEND_GRPC_PORT "7236" }}
+            membershipPort: {{ default .Env.INTERNAL_FRONTEND_MEMBERSHIP_PORT "6936" }}
             bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
 
     matching:
@@ -251,11 +250,6 @@ kafka:
         visibility:
             topic: temporal-visibility-dev
             dlq-topic: temporal-visibility-dev-dlq
-
-{{ $publicIp := default .Env.BIND_ON_IP "127.0.0.1" -}}
-{{- $defaultPublicHostPost := (print $publicIp ":" $temporalGrpcPort) -}}
-publicClient:
-    hostPort: {{ default .Env.PUBLIC_FRONTEND_ADDRESS $defaultPublicHostPost }}
 
 dynamicConfigClient:
     filepath: {{ default .Env.DYNAMIC_CONFIG_FILE_PATH "/etc/temporal/config/dynamicconfig" }}

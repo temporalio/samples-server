@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # This scripts generates test keys and certificates for the sample.
 # In a production environment such artifacts should be genrated
 # by a proper certificate authority and handled in a secure manner.
@@ -24,19 +26,23 @@ generate_root_ca_cert() {
 }
 
 generate_cert() {
-    openssl req -newkey rsa:4096 -nodes -keyout "$2/$1.key" -sha256 -out "$TEMP_DIR/$1.csr" -config "$1.conf"
-    openssl x509 -req -in $TEMP_DIR/$1.csr -CA $3.pem -CAkey $3.key -sha256 -CAcreateserial -out $2/$1.pem -days 365 -extfile $1.conf -extensions $4
-    CHAIN_FILE="$2/$1.pem"
-    if [[ $5 != 'no_chain' ]]
-    then
-      cat $2/$1.pem $3.pem > $2/$1-chain.pem
-      CHAIN_FILE="$2/$1-chain.pem"
+    local name=$1
+    local dir=$2
+    local ca=$3
+    local exts=$4
+    local no_chain_opt=$5
+
+    openssl req -newkey rsa:4096 -nodes -keyout "$dir/$name.key" -sha256 -out "$TEMP_DIR/$name.csr" -config "$name.conf"
+    openssl x509 -req -in $TEMP_DIR/$name.csr -CA $ca.pem -CAkey $ca.key -sha256 -CAcreateserial -out $dir/$name.pem -days 365 -extfile $name.conf -extensions $exts
+    local chain_file="$dir/$name.pem"
+    if [[ $no_chain_opt != no_chain ]]; then
+        chain_file="$dir/$name-chain.pem"
+        cat $dir/$name.pem $ca.pem > $chain_file
     fi
 
-      # Export to .pfx
-      # "-keypbe NONE -certpbe NONE -passout pass:" exports into an unencrypted .pfx archive
-      openssl pkcs12 -export -out $2/$1.pfx -inkey $2/$1.key -in $CHAIN_FILE -keypbe NONE -certpbe NONE -passout pass:  
-
+    # Export to .pfx
+    # "-keypbe NONE -certpbe NONE -passout pass:" exports into an unencrypted .pfx archive
+    openssl pkcs12 -export -out $dir/$name.pfx -inkey $dir/$name.key -in $chain_file -keypbe NONE -certpbe NONE -passout pass:
 }
 
 echo Generate a private key and a certificate for server root CA
@@ -45,7 +51,7 @@ generate_root_ca_cert server-root-ca $CLUSTER_DIR/ca
 echo Generate a private key and a certificate for server intermediate CA
 generate_cert server-intermediate-ca $CLUSTER_DIR/ca $CLUSTER_DIR/ca/server-root-ca v3_ca no_chain
 
-echo Generate a private key and a certificate for internode communication 
+echo Generate a private key and a certificate for internode communication
 generate_cert cluster-internode $CLUSTER_DIR/internode $CLUSTER_DIR/ca/server-intermediate-ca req_ext
 
 echo Generate a private key and a server certificate for accounting namespace
@@ -64,8 +70,10 @@ generate_cert client-intermediate-ca-accounting $CLIENT_DIR/ca $CLIENT_DIR/ca/cl
 echo Generate a private key and a certificate for client intermediate CA for development namespace
 generate_cert client-intermediate-ca-development $CLIENT_DIR/ca $CLIENT_DIR/ca/client-root-ca v3_ca no_chain
 
-echo Generate a private key and a certificate for accounting namespace client 
+echo Generate a private key and a certificate for accounting namespace client
 generate_cert client-accounting-namespace $CLIENT_DIR/accounting $CLIENT_DIR/ca/client-intermediate-ca-accounting req_ext
 
-echo Generate a private key and a certificate for development namespace client 
+echo Generate a private key and a certificate for development namespace client
 generate_cert client-development-namespace $CLIENT_DIR/development $CLIENT_DIR/ca/client-intermediate-ca-development req_ext
+
+rm -rf $TEMP_DIR
