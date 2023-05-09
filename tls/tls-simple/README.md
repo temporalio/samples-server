@@ -28,17 +28,17 @@ After disabling client authentication as per the above directions, you could use
 ```bash
 temporal operator namespace create \
     --tls-ca-path certs/ca.cert \
-	--tls-server-name tls-sample \
-	testing
+    --tls-server-name tls-sample \
+    testing
 ```
 
 Here is the corresponding `tctl` command:
 ```bash
 tctl \
     --tls_ca_path certs/ca.cert \
-	--tls_server_name tls-sample \
-	--namespace testing \
-	namespace register
+    --tls_server_name tls-sample \
+    --namespace testing \
+    namespace register
 ```
 
 #### Connecting to the Cluster via TLS (Go SDK)
