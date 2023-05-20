@@ -12,7 +12,7 @@ const requireEnvVar = (variableName: string): string => {
 };
 
 const newRelicMetricsApi = axios.create({
-  baseURL: "https://metric-api.newrelic.com/metric",
+  baseURL: "https://metric-api.newrelic.com",
   timeout: 3000,
   headers: { "Api-Key": requireEnvVar("NEW_RELIC_API_KEY") },
 });
@@ -270,7 +270,7 @@ const main = async () => {
 
     console.log({ level: "info", message: "Submitting metrics to Newrelic" });
 
-    const res = await newRelicMetricsApi.post("/v1", [
+    const res = await newRelicMetricsApi.post("/metric/v1", [
       { metrics: [...countMetrics, ...gaugeMetrics] },
     ]);
 
