@@ -1,7 +1,7 @@
 PromQL to Datadog
 =================
 
-The goal of this example script is to demonstrate the minimum work necessary to read recently generated metrics from a Temporal Cloud account using the Prometheus API and import them into DataDog while handling some common edge and error cases. Python was chosen for relative simplity and clarity, with some choices made to get from downloading this script to seeing metrics in DataDog as quickly as possible. A Typescript example has also been contributed.
+The goal of this example script is to demonstrate the minimum work necessary to read recently generated metrics from a Temporal Cloud account using the Prometheus API and import them into DataDog while handling some common edge and error cases. Python was chosen for relative simplicity and clarity, with some choices made to get from downloading this script to seeing metrics in DataDog as quickly as possible. A Typescript example has also been contributed.
 
 Destination metrics could be modified to match a DataDog environment's naming conventions and metrics types by modifying the DataDog API calls as needed.
 
