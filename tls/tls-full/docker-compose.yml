@@ -25,17 +25,17 @@ services:
       - "TEMPORAL_CLI_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
     depends_on:
       - cassandra
-  temporal-web:
-    image: temporalio/web:${WEB_TAG:-latest}
+  temporal-ui:
+    image: temporalio/ui:${UI_TAG:-latest}
     ports:
-      - "8088:8088"
+      - "8080:8080"
     volumes:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
     environment:
-      - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
-      - "TEMPORAL_TLS_CERT_PATH=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
-      - "TEMPORAL_TLS_KEY_PATH=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
-      - "TEMPORAL_TLS_CA_PATH=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_ADDRESS=temporal:7233"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_TLS_SERVER_NAME=development.cluster-x.contoso.com"
     depends_on:
