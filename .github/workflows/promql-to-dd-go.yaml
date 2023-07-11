@@ -1,0 +1,24 @@
+name: Test, build and publish promql-to-dd-go
+
+on:
+  push:
+    paths:
+      - 'cloud/observability/promql-to-dd-go/**'
+      - '!cloud/observability/promql-to-dd-go/examples/**'
+      - '!cloud/observability/promql-to-dd-go/helm-charts/**'
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    paths:
+      - 'cloud/observability/promql-to-dd-go/**'
+      - '!cloud/observability/promql-to-dd-go/examples/**'
+      - '!cloud/observability/promql-to-dd-go/helm-charts/**'
+
+jobs:
+  test:
+    uses: ./.github/workflows/promql-to-dd-go_test.yaml
+  push:
+    needs: test
+    uses: ./.github/workflows/promql-to-dd-go_build-publish.yaml

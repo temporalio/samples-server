@@ -14,7 +14,7 @@ COPY . .
 RUN go mod download
 RUN go get -d -v ./...
 
-RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+RUN CGO_ENABLED=${CGO_ENABLED:-0} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   go build -o ${GOPATH:-/go}/bin/ ${GOPATH:-/go}/src/promql-to-dd-go/cmd/promqltodd
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} centos:latest
