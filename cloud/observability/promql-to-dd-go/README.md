@@ -7,6 +7,12 @@ Destination metrics could be modified to match a DataDog environment's naming co
 
 **These examples are provided as-is, without support. They are intended as reference material only.**
 
+# Example dashboard
+
+![Dashboard](cloud/observability/promql-to-dd-go/examples/datadog_dashboard.png)
+
+Download the dashboard from [here](cloud/observability/promql-to-dd-go/examples/datadog_dashboard.json).
+
 # Running locally
 
 ## Prerequisites
