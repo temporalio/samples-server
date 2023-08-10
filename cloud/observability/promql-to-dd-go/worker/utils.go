@@ -32,9 +32,9 @@ func PromHistogramToDatadogGauge(name string, quantile float64, matrix model.Mat
 	return matrixToSeries(name, metricType, matrix)
 }
 
-func PromCountToDatadogCount(name string, matrix model.Matrix) []datadogV2.MetricSeries {
+func PromCountToDatadogRate(name string, matrix model.Matrix) []datadogV2.MetricSeries {
 	name = strings.TrimSuffix(name, "_count") + "_rate1m"
-	metricType := datadogV2.METRICINTAKETYPE_COUNT
+	metricType := datadogV2.METRICINTAKETYPE_RATE
 	return matrixToSeries(name, metricType, matrix)
 }
 

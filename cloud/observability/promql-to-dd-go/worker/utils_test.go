@@ -14,7 +14,7 @@ func Ptr[T any](v T) *T {
 	return &v
 }
 
-func TestPromMatrixToDatadogSeries(t *testing.T) {
+func TestPromHistogramToDatadogGauge(t *testing.T) {
 	testCases := []struct {
 		name       string
 		metricName string
