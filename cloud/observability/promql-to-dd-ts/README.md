@@ -7,10 +7,6 @@ Destination metrics could be modified to match a DataDog environment's naming co
 
 **These examples are provided as-is, without support. They are intended as reference material only.**
 
-# Example dashboard
-
-Download the dashboard from [here](examples/datadog_dashboard.json).
-
 # Running locally
 
 ## Prerequisites
