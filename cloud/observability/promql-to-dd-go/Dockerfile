@@ -21,4 +21,4 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} centos:latest
 
 COPY --from=builder ${GOPATH:-/go}/bin/promqltodd /
 
-CMD ["/promqltodd"]
+ENTRYPOINT ["/promqltodd"]
