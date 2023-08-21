@@ -25,7 +25,6 @@ spec:
       - name: promqltodd
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-        command: ["/promqltodd"]
         args:
         - --client-cert=/var/run/secrets/ca_cert
         - --client-key=/var/run/secrets/ca_key
