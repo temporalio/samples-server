@@ -17,8 +17,10 @@ global:
     broadcastAddress: "127.0.0.1"
   pprof:
     port: 7936
-  metrics:
-    tags:
+# Tags can be configured per service in config file
+#  metrics:
+#    tags:
+#      test: "testvalue"
 
 services:
   frontend:
@@ -38,6 +40,9 @@ services:
       grpcPort: 7234
       membershipPort: 6934
       bindOnLocalHost: true
+    metrics:
+      tags:
+        test: "testvalueppv"
 
   worker:
     rpc:
@@ -87,6 +92,19 @@ namespaceDefaults:
     visibility:
       state: "disabled"
       URI: "file:///tmp/temporal_vis_archival/development"
+
+kafka:
+  tls:
+    enabled: false
+  clusters:
+    test:
+      brokers:
+        - 127.0.0.1:9092
+  topics:
+    temporal-visibility-dev:
+      cluster: test
+    temporal-visibility-dev-dlq:
+      cluster: test
 
 publicClient:
   hostPort: "localhost:7233"
