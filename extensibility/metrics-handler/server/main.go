@@ -33,14 +33,17 @@ import (
 )
 
 func main() {
-	s, _ := temporal.NewServer(
+	s, err := temporal.NewServer(
 		temporal.ForServices(temporal.DefaultServices),
 		temporal.WithConfigLoader("./metrics-handler/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithCustomMetricsHandler(metrics_handler.NewConsoleMetricsHandler()),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := s.Start()
+	err = s.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
