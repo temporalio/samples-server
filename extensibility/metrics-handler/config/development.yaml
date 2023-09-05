@@ -40,9 +40,6 @@ services:
       grpcPort: 7234
       membershipPort: 6934
       bindOnLocalHost: true
-    metrics:
-      tags:
-        test: "testvalueppv"
 
   worker:
     rpc:
