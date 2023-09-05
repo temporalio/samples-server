@@ -42,7 +42,7 @@ func main() {
 	}
 
 	s, err := temporal.NewServer(
-		temporal.ForServices(temporal.Services),
+		temporal.ForServices(temporal.DefaultServices),
 		temporal.WithConfig(cfg),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithClaimMapper(func(cfg *config.Config) authorization.ClaimMapper {
