@@ -34,15 +34,15 @@ import (
 	"github.com/temporalio/service-samples/authorizer"
 )
 
-func main(){
+func main() {
 
 	cfg, err := config.LoadConfig("development", "./config", "")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := temporal.NewServer(
-		temporal.ForServices(temporal.Services),
+	s, err := temporal.NewServer(
+		temporal.ForServices(temporal.DefaultServices),
 		temporal.WithConfig(cfg),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithClaimMapper(func(cfg *config.Config) authorization.ClaimMapper {
@@ -50,9 +50,12 @@ func main(){
 		}),
 		temporal.WithAuthorizer(authorizer.NewMyAuthorizer()),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = s.Start()
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
