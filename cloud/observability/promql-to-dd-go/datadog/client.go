@@ -47,6 +47,16 @@ func (c *APIClient) SubmitMetrics(series []datadogV2.MetricSeries) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			ctx = datadog.NewDefaultContext(ctx)
+
+			// https://pkg.go.dev/github.com/DataDog/datadog-api-client-go/v2#hdr-Changing_Server
+			if site, ok := os.LookupEnv("DD_SITE"); ok {
+        			ctx = context.WithValue(
+            				ctx,
+        				datadog.ContextServerVariables,
+					map[string]string{"site": site},
+        			)
+    			}
+			
 			body := datadogV2.MetricPayload{Series: pagedSeries}
 
 			resp, httpr, err := c.api.SubmitMetrics(ctx, body, *datadogV2.NewSubmitMetricsOptionalParameters())
