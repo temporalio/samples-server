@@ -107,4 +107,4 @@ sequenceDiagram
         DataDog -->> Importer: report success
     end
     Note right of DataDog: 10m range covers<br>out of order<br>results and<br>transient errors
-```
+    ```
