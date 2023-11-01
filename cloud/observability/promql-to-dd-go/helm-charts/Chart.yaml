@@ -1,0 +1,14 @@
+apiVersion: v2
+name: promql-to-dd-go
+version: 0.1.0
+description: |
+  A demonstrative Chart for deploying promql-to-dd-go to Kubernetes.
+  The Chart is provided as-is, without support. They are intended as reference material only.
+home: https://github.com/temporalio/samples-server/tree/main/cloud/observability/promql-to-dd-go
+keywords:
+  - temporal
+  - prometheus
+  - datadog
+maintainers:
+  - name: taonic
+type: application

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "promql-to-dd-go.name" . }}
+  labels:
+    app: {{ template "promql-to-dd-go.name" . }}
+    chart: {{ template "promql-to-dd-go.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "promql-to-dd-go.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "promql-to-dd-go.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: promqltodd
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        args:
+        - --client-cert=/var/run/secrets/ca_cert
+        - --client-key=/var/run/secrets/ca_key
+        - --prom-endpoint={{ .Values.prom_endpoint }}
+        env:
+        - name: DD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "promql-to-dd-go.name" . }}-secrets
+              key: dd_api_key
+        volumeMounts:
+        - name: secrets
+          mountPath: /var/run/secrets
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ template "promql-to-dd-go.name" . }}-secrets

@@ -1,0 +1,29 @@
+{
+  "name": "promql-to-dd.ts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "start.watch": "nodemon src/worker.ts"
+  },
+  "nodemonConfig": {
+    "execMap": {
+      "ts": "ts-node"
+    },
+    "ext": "ts",
+    "watch": [
+      "src"
+    ]
+  },
+  "dependencies": {
+    "@datadog/datadog-api-client": "^1.15.0",
+    "axios": "^1.4.0",
+    "@types/node": "^7.0.5",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.0",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.2.1"
+  }
+}

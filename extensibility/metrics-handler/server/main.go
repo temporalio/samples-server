@@ -29,18 +29,21 @@ import (
 
 	"go.temporal.io/server/temporal"
 
-	"github.com/temporalio/service-samples/metrics-reporter"
+	metrics_handler "github.com/temporalio/service-samples/metrics-handler"
 )
 
 func main() {
-	s := temporal.NewServer(
-		temporal.ForServices(temporal.Services),
-		temporal.WithConfigLoader("./metrics-reporter/config", "development", ""),
+	s, err := temporal.NewServer(
+		temporal.ForServices(temporal.DefaultServices),
+		temporal.WithConfigLoader("./metrics-handler/config", "development", ""),
 		temporal.InterruptOn(temporal.InterruptCh()),
-		temporal.WithCustomMetricsReporter(metrics.NewReporter()),
+		temporal.WithCustomMetricsHandler(metrics_handler.NewConsoleMetricsHandler()),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := s.Start()
+	err = s.Start()
 	if err != nil {
 		log.Fatal(err)
 	}

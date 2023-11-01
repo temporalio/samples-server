@@ -1,0 +1,8 @@
+# Default values for promql-to-dd-go.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: ghcr.io/temporalio/promql-to-dd-go
+  tag: latest
+  imagePullPolicy: Always

@@ -2,53 +2,59 @@ import { client, v2 } from '@datadog/datadog-api-client'
 import axios from 'axios'
 import { Agent } from 'https'
 import { z } from 'zod'
+import * as fs from 'fs';
 
-// This automatically pulls API keys from env vars DD_API_KEY
-const configuration = client.createConfiguration()
 
-client.setServerVariables(configuration, {
-    site: 'us5.datadoghq.com',
-})
-const datadogMetricsApi = new v2.MetricsApi(configuration)
 
 const requireEnvVar = (variableName: string): string => {
     const value = process.env[variableName]
-
     if (!value) {
         throw new Error(`Missing environment variable ${variableName}`)
     }
-
     return value
 }
+
+
+//Required env variables
+const METRICS_CLIENT_CERT = requireEnvVar('METRICS_CLIENT_CERT');
+const METRICS_CLIENT_KEY = requireEnvVar('METRICS_CLIENT_KEY');
+const TEMPORAL_ACCOUNT = requireEnvVar('TEMPORAL_ACCOUNT');
+const DD_SITE = requireEnvVar('DD_SITE');
+// This automatically pulls API keys from env vars DD_API_KEY
+const configuration = client.createConfiguration()
+//End Required env variables
+
+const TEMPORAL_CLOUD_BASE_URL = `https://${TEMPORAL_ACCOUNT}.tmprl.cloud`
+const PROM_LABELS_URL = `${TEMPORAL_CLOUD_BASE_URL}/prometheus/api/v1/label/__name__/values`
+const PROM_QUERY_URL = `${TEMPORAL_CLOUD_BASE_URL}/prometheus/api/v1/query_range`
+
+// This allows people to do local development on this service without polluting the metrics which
+// are critical to ongoing LXB production observability.
+const DATADOG_METRIC_PREFIX = process.env.TEST_METRIC_PREFIX || ''
+
+// We're going to query Prometheus with a resolution of 1 minute
+const PROMETHEUS_STEP_SECONDS = 60
+
+// On an ongoing basis, query only for the last 1 minutes of data.
+const QUERY_WINDOW_SECONDS = 1 * 60
+
+const HISTOGRAM_QUANTILES = [0.5, 0.9, 0.95, 0.99]
+
+client.setServerVariables(configuration, {
+    site: DD_SITE,
+})
+const datadogMetricsApi = new v2.MetricsApi(configuration)
 
 const setTimeoutAsync = async (millis: number): Promise<void> => {
     return new Promise(resolve => setTimeout(resolve, millis))
 }
 
 const httpsAgent = new Agent({
-    cert: Buffer.from(
-        Buffer.from(requireEnvVar('TEMPORAL_OBSERVABILITY_CERT'), 'base64').toString(),
-    ),
-    key: Buffer.from(
-        Buffer.from(requireEnvVar('TEMPORAL_OBSERVABILITY_KEY'), 'base64').toString(),
-    ),
+    cert: fs.readFileSync(METRICS_CLIENT_CERT),
+    key: fs.readFileSync(METRICS_CLIENT_KEY)
 })
 
-// This allows people to do local development on this service without polluting the metrics which
-// are critical to ongoing LXB production observability.
-const DATADOG_METRIC_PREFIX = process.env.TEST_METRIC_PREFIX || ''
 
-const TEMPORAL_CLOUD_BASE_URL = 'https://lvpqy.tmprl.cloud'
-const PROM_LABELS_URL = `${TEMPORAL_CLOUD_BASE_URL}/prometheus/api/v1/label/__name__/values`
-const PROM_QUERY_URL = `${TEMPORAL_CLOUD_BASE_URL}/prometheus/api/v1/query_range`
-
-// We're going to query Prometheus with a resolution of 1 minute
-const PROMETHEUS_STEP_SECONDS = 60
-
-// On an ongoing basis, query only for the last 10 minutes of data.
-const QUERY_WINDOW_SECONDS = 10 * 60
-
-const HISTOGRAM_QUANTILES = [0.5, 0.9, 0.95, 0.99]
 
 const basePrometheusQueryParams = {
     step: PROMETHEUS_STEP_SECONDS.toFixed(0),
@@ -64,9 +70,11 @@ const getMetricNames = async (): Promise<{
     countMetricNames: string[]
     histogramMetricNames: string[]
 }> => {
+
     const metricNamesResponse = await axios.get(PROM_LABELS_URL, {
         httpsAgent,
     })
+
     const { data: metricNames } = labelsResponseDataSchema.parse(metricNamesResponse.data)
 
     const temporalCloudMetricNames = metricNames.filter(
@@ -106,7 +114,6 @@ const generateQueryWindow = (): QueryWindow => {
 
     const windowInSeconds = QUERY_WINDOW_SECONDS
     const startSecondsSinceEpoch = (endSecondsSinceEpoch - windowInSeconds)
-
     return alignQueryWindowOnPrometheusStep({ startSecondsSinceEpoch, endSecondsSinceEpoch })
 }
 
@@ -205,6 +212,8 @@ const convertPrometheusHistogramToDatadogGuageSeries = (
 
 
 const main = async () => {
+
+
     const {
         countMetricNames,
         histogramMetricNames,
@@ -218,6 +227,7 @@ const main = async () => {
     })
 
     while (true) {
+
         const queryWindow = generateQueryWindow()
 
         console.log({
@@ -248,9 +258,9 @@ const main = async () => {
 
         console.log({ level: 'info', message: 'Submitting metrics to Datadog' })
         await datadogMetricsApi.submitMetrics({ body: { series: [
-            ...countSeries,
-            ...guageSeries,
-        ]}})
+                    ...countSeries,
+                    ...guageSeries,
+                ]}})
 
         console.log({ level: 'info', message: 'Pausing for 20s' })
         await setTimeoutAsync(20 * 1000)
@@ -263,14 +273,4 @@ main().catch(error => {
         message: 'Error in main loop. Closing healthcheck server.',
         error,
     })
-
-    server.close(() => {
-        console.log({
-            level: 'info',
-            message: 'Healthcheck server closed',
-        })
-
-        process.exit(1)
-    })
 })
-

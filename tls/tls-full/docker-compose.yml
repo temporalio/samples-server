@@ -17,25 +17,31 @@ services:
       - "SERVICES=frontend:matching:history:worker:internal-frontend"
       - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
       - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.key"
       - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_CLI_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
+      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.key"
+      - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
     depends_on:
       - cassandra
-  temporal-web:
-    image: temporalio/web:${WEB_TAG:-latest}
+  temporal-ui:
+    image: temporalio/ui:${UI_TAG:-latest}
     ports:
-      - "8088:8088"
+      - "8080:8080"
     volumes:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
     environment:
-      - "TEMPORAL_GRPC_ENDPOINT=temporal:7233"
-      - "TEMPORAL_TLS_CERT_PATH=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
-      - "TEMPORAL_TLS_KEY_PATH=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
-      - "TEMPORAL_TLS_CA_PATH=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_ADDRESS=temporal:7233"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_TLS_SERVER_NAME=development.cluster-x.contoso.com"
     depends_on:
@@ -47,12 +53,18 @@ services:
     volumes:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
     environment:
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
       - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.key"
       - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_CLI_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
+      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster/internode/cluster-internode.key"
+      - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
     depends_on:
       - temporal
   temporal-cli-accounting:
@@ -63,13 +75,20 @@ services:
       - "${TEMPORAL_LOCAL_CERT_DIR}/client/accounting:${TEMPORAL_TLS_CERTS_DIR}/client/accounting"
       - "${TEMPORAL_LOCAL_CERT_DIR}/cluster/ca/server-intermediate-ca.pem:${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
     environment:
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace-chain.pem"
       - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace.key"
       - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_CLI_TLS_SERVER_NAME=accounting.cluster-x.contoso.com"
       - "TEMPORAL_CLI_NAMESPACE=accounting"
+      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace-chain.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/accounting/client-accounting-namespace.key"
+      - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_TLS_SERVER_NAME=accounting.cluster-x.contoso.com"
+      - "TEMPORAL_NAMESPACE=accounting"
     depends_on:
       - temporal
   temporal-cli-development:
@@ -80,12 +99,19 @@ services:
       - "${TEMPORAL_LOCAL_CERT_DIR}/client/development:${TEMPORAL_TLS_CERTS_DIR}/client/development"
       - "${TEMPORAL_LOCAL_CERT_DIR}/cluster/ca/server-intermediate-ca.pem:${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
     environment:
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233"
+      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
       - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
       - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
       - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_CLI_TLS_SERVER_NAME=development.cluster-x.contoso.com"
       - "TEMPORAL_CLI_NAMESPACE=development"
+      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
+      - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace-chain.pem"
+      - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client/development/client-development-namespace.key"
+      - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
+      - "TEMPORAL_TLS_SERVER_NAME=development.cluster-x.contoso.com"
+      - "TEMPORAL_NAMESPACE=development"
     depends_on:
       - temporal
