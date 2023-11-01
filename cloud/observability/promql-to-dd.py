@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """
 promql-to-dd.py - Import counters and histograms from prometheus api endpoint into datadog
+
 While this demonstrates how to import prometheus api data using the datadog metrics API,
 there is a lot of room for improvement in terms of efficency and error handling.
+
 To view this data in DataDog Metrics:
 * use sum and as_rate for rate metrics
 * use sum for gauge metrics
+
 This script depends on these packages:
 https://pypi.org/project/tenacity/
 https://pypi.org/project/requests/
 https://pypi.org/project/datadog-api-client/
+
 For documentation on the prometheus API used see:
     https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries
+
 For documentation on PromQL see:
     https://prometheus.io/docs/prometheus/latest/querying/basics/
+    
 For documentation on DataDog Metrics API see:
     https://docs.datadoghq.com/api/latest/metrics/#submit-metrics
 """
