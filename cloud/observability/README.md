@@ -36,7 +36,9 @@ Here is the help output:
 
 ```
 usage: promql-to-dd.py [-h] --temporal-account TEMPORAL_ACCOUNT --metrics-client-cert METRICS_CLIENT_CERT --metrics-client-key METRICS_CLIENT_KEY --dd-site DD_SITE --dd-api-key DD_API_KEY
+
 Export Prometheus API metrics and import into DataDog
+
 options:
   -h, --help            show this help message and exit
   --temporal-account TEMPORAL_ACCOUNT
