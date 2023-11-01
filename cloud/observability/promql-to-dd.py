@@ -19,7 +19,7 @@ For documentation on the prometheus API used see:
 
 For documentation on PromQL see:
     https://prometheus.io/docs/prometheus/latest/querying/basics/
-    
+
 For documentation on DataDog Metrics API see:
     https://docs.datadoghq.com/api/latest/metrics/#submit-metrics
 """
