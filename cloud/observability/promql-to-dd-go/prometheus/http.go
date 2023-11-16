@@ -45,6 +45,9 @@ func (c *HttpClient) Do(ctx context.Context, req *http.Request) (*http.Response,
 	if ctx != nil {
 		req = req.WithContext(ctx)
 	}
+
+	req.Header.Set("User-Agent", "promql-to-dd")
+
 	resp, err := c.Client.Do(req)
 	defer func() {
 		if resp != nil {
