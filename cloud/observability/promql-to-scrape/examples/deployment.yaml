@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: promql-to-scrape
-        image: "<image>"
+        image: ghcr.io/temporalio/promql-to-scrape:7c0e91a
         args:
         - --client-cert=/var/run/secrets/ca_crt
         - --client-key=/var/run/secrets/ca_key
