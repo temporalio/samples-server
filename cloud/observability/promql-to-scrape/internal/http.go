@@ -1,4 +1,4 @@
-package prometheus
+package internal
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ func (c *HttpClient) Do(ctx context.Context, req *http.Request) (*http.Response,
 		req = req.WithContext(ctx)
 	}
 
-	req.Header.Set("User-Agent", "promql-to-dd")
+	req.Header.Set("User-Agent", "promql-to-scrape")
 
 	resp, err := c.Client.Do(req)
 	defer func() {

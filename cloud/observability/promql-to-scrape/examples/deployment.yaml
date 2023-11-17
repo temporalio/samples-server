@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promql-to-scrape
+  labels:
+    app: promql-to-scrape
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promql-to-scrape
+  template:
+    metadata:
+      labels:
+        app: promql-to-scrape
+    spec:
+      containers:
+      - name: promql-to-scrape
+        image: ghcr.io/temporalio/promql-to-scrape:7c0e91a
+        args:
+        - --client-cert=/var/run/secrets/ca_crt
+        - --client-key=/var/run/secrets/ca_key
+        - --prom-endpoint=https://<account>.tmprl.cloud/prometheus
+        - --config-file=/etc/promql-to-scrape/config.yaml
+        - --debug
+        ports:
+        - containerPort: 9001
+        volumeMounts:
+        - name: secrets
+          mountPath: /var/run/secrets
+          readOnly: true
+        - name: config-volume
+          mountPath: /etc/promql-to-scrape
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "256Mi"
+      volumes:
+      - name: secrets
+        secret:
+          secretName: promql-to-scrape-secrets
+      - name: config-volume
+        configMap:
+          name: promql-to-scrape-config
+          items:
+          - key: config.yaml
+            path: config.yaml
