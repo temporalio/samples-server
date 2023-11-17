@@ -1,6 +1,6 @@
 module github.com/temporalio/samples-server/cloud/observability/promql-to-scrape
 
-go 1.20
+go 1.21
 
 require (
 	github.com/prometheus/client_golang v1.17.0

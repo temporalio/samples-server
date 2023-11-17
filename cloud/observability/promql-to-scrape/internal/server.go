@@ -16,7 +16,7 @@ type PromToScrapeServer struct {
 	data               string
 	lastSuccessfulTime time.Time
 
-	sync.Mutex
+	sync.RWMutex
 }
 
 func NewPromToScrapeServer(client *APIClient, conf *Config, addr string) *PromToScrapeServer {
@@ -43,7 +43,7 @@ func NewPromToScrapeServer(client *APIClient, conf *Config, addr string) *PromTo
 
 // metricsHandler is the HTTP handler for the "/metrics" endpoint.
 func (s *PromToScrapeServer) metricsHandler(w http.ResponseWriter, r *http.Request) {
-	s.Lock()
+	s.RLock()
 	defer s.Unlock()
 	if time.Since(s.lastSuccessfulTime) < 5*time.Minute {
 		fmt.Fprint(w, s.data)

@@ -28,13 +28,12 @@ func main() {
 		log.Fatalf("-client-cert, -client-key, -config-file, -prom-endpoint are required")
 	}
 
+	logLevel := slog.LevelInfo
 	if *debugLogging {
-		h := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})
-		slog.SetDefault(slog.New(h))
-	} else {
-		h := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo})
-		slog.SetDefault(slog.New(h))
+		logLevel = slog.LevelDebug
 	}
+	h := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(h))
 
 	client, err := internal.NewAPIClient(
 		internal.APIConfig{
