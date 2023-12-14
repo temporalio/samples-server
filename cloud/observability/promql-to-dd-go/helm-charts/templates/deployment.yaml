@@ -29,6 +29,7 @@ spec:
         - --client-cert=/var/run/secrets/ca_cert
         - --client-key=/var/run/secrets/ca_key
         - --prom-endpoint={{ .Values.prom_endpoint }}
+        - --query-interval-seconds={{ .Values.query_interval_seconds }}
         env:
         - name: DD_API_KEY
           valueFrom:
