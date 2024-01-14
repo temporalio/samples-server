@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@datadog/datadog-api-client": "^1.15.0",
-    "axios": "^1.4.0",
+    "axios": "^1.6.3",
     "@types/node": "^7.0.5",
     "zod": "^3.21.4"
   },
