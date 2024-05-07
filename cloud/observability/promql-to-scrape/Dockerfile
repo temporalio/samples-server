@@ -1,11 +1,24 @@
-FROM golang:1.21-alpine
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.21 as builder
 
-WORKDIR /usr/src/app
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+ARG Version
+ARG GitCommit
+
+WORKDIR ${GOPATH:-/go}/src/promql-to-scrape
 
 COPY . .
-RUN go build -v -o /usr/local/bin/promql-to-scrape ./cmd/promql-to-scrape/main.go
+RUN go mod download
+RUN go get -d -v ./...
 
-ENTRYPOINT ["/usr/local/bin/promql-to-scrape"]
+RUN CGO_ENABLED=${CGO_ENABLED:-0} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+  go build -o ${GOPATH:-/go}/bin/ ${GOPATH:-/go}/src/promql-to-scrape/cmd/promql-to-scrape
+
+FROM --platform=${BUILDPLATFORM:-linux/amd64} centos:latest
+
+COPY --from=builder ${GOPATH:-/go}/bin/promql-to-scrape /
+
+ENTRYPOINT ["/promql-to-scrape"]
