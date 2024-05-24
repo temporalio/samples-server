@@ -1,13 +1,12 @@
 module github.com/temporalio/service-samples
 
-go 1.21
-
-toolchain go1.22.1
+go 1.22.3
 
 require go.temporal.io/server v1.23.1
 
 // Remove this after 1.24 go.temporal.io/server release
 replace go.temporal.io/api => go.temporal.io/api v1.30.0
+
 replace go.temporal.io/sdk => go.temporal.io/sdk v1.26.0
 
 require (
