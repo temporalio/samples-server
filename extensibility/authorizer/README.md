@@ -6,7 +6,7 @@ The sample implementation of the authorizer interface `authorization.Authorizer`
 ### Steps to run this sample
 1. Start up the dependencies by running the `make start-dependencies` command from within the main Temporal repository as described in the [contribution guide](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md#run-temporal-server-locally).
 
-2. Create the database schema by running `make install-schema`.
+2. Create the database schema by running `make install-schema-cass-es`.
 
 3. Start Temporal by running `go run authorizer/server/main.go`.
 
