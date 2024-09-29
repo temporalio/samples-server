@@ -17,7 +17,7 @@ RUN go get -d -v ./...
 RUN CGO_ENABLED=${CGO_ENABLED:-0} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   go build -o ${GOPATH:-/go}/bin/ ${GOPATH:-/go}/src/promql-to-scrape/cmd/promql-to-scrape
 
-FROM --platform=${BUILDPLATFORM:-linux/amd64} centos:latest
+FROM --platform=${BUILDPLATFORM:-linux/amd64} alpine:latest
 
 COPY --from=builder ${GOPATH:-/go}/bin/promql-to-scrape /
 
