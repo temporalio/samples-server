@@ -20,7 +20,7 @@ bash start-temporal.sh
 ```
 
 ### Disabling Client Authentication
-The Temporal Cluster you launched by running the commands above uses mutual TLS (mTLS), meaning that it requires the client and server to authenticate one another by verifying each other's certificates when making a connection. If you would prefer to use TLS (that is, disable the server's veriification of the client's certificate), edit the `docker-compose.yml` file, change the value of `TEMPORAL_TLS_REQUIRE_CLIENT_AUTH` variable from `true` to `false`, and then restart the `start-temporal.sh` script.
+The Temporal Cluster you launched by running the commands above uses mutual TLS (mTLS), meaning that it requires the client and server to authenticate one another by verifying each other's certificates when making a connection. If you would prefer to use TLS (that is, disable the server's verification of the client's certificate), edit the `docker-compose.yml` file, change the value of `TEMPORAL_TLS_REQUIRE_CLIENT_AUTH` variable from `true` to `false`, and then restart the `start-temporal.sh` script.
 
 #### Connecting to the Cluster via TLS (Command Line)
 After disabling client authentication as per the above directions, you could use the `temporal` command to connect to the cluster by specifying options for the path to the CA certificate and the TLS Server Name. The following example shows how to use these options to register a new namespace (`testing`, in this example):
