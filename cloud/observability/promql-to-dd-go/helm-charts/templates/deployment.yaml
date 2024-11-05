@@ -36,6 +36,8 @@ spec:
             secretKeyRef:
               name: {{ template "promql-to-dd-go.name" . }}-secrets
               key: dd_api_key
+        - name: DD_SITE
+          value: "us5.datdoghq.com"
         volumeMounts:
         - name: secrets
           mountPath: /var/run/secrets
