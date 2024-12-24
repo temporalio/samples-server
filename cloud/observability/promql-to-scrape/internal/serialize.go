@@ -38,7 +38,7 @@ func SamplesToString(queriedMetrics map[string][]*model.Sample) string {
 		sb.WriteString("# TYPE ")
 		sb.WriteString(nameWithoutSuffix)
 		sb.WriteByte(' ')
-		sb.WriteString("gauge")
+		sb.WriteString(getMetricType(metricName))
 		sb.WriteByte('\n')
 
 		for _, s := range samples {
