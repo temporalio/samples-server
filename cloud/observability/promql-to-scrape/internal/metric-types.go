@@ -4,7 +4,7 @@ import "strings"
 
 const (
 	metricTypeHistogram = "histogram"
-	metricTypeCounter   = "count"
+	metricTypeCounter   = "counter"
 	metricTypeGauge     = "gauge"
 )
 
