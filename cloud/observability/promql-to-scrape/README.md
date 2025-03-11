@@ -21,9 +21,13 @@ This means you can now hit http://localhost:9001/metrics on your machine and see
 
 ### Important Usability Information
 
-**Important:** When you go to scrape this, you should do so with a **60s** scrape interval, unless you are meaningfully modifying this code. The example queries all assume a 1 minute rate and you'll want these to be equal.
+**Important:** When you scrape this endpoint, you should do so with a scrape interval **<= the rate interval of the queries in your config file, and at least 1m**.
 
-**Very Important:** The data you will see here is approximately 1 minute delayed (should you conform to the guidance above). Due to the aggregation that happens before metrics are presented to you, it's necessary for us to send the queries from this application to look 60 seconds in the past. Otherwise data aggregation would not be complete, and there would be no results for each query.
+In general, you'll want the scrape interval and rate interval to be equal, as downstream systems may assume that timeseries data is exclusive to the interval between points.
+
+But if you're ok with a gauge that is looking back longer than the interval between data points in your timeseries database, a scrape interval < the rate interval is acceptable.
+
+**Important:** The data you will see here is subject to an aggregation delay. You may encounter issues with data appearing missing if you **use a rate interval < 2m**.
 
 ## Deployment
 
