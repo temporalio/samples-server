@@ -25,11 +25,6 @@ This means you can now hit http://localhost:9001/metrics on your machine and see
 
 **Important:** When you scrape this endpoint, you should do so with a scrape interval **<= the rate interval of the queries in your config file, and at least 1m**.
 
-In general, you'll want the scrape interval and rate interval to be equal, as downstream systems may assume that timeseries data is exclusive to the interval between points.
-
-But if you're ok with a gauge that is looking back longer than the interval between data points in your timeseries database, a scrape interval < the rate interval is acceptable.
-
-
 ## Deployment
 
 Some example Kubernetes manifests are provided in the `/examples` directory. Filling in your certificates and account should get you going pretty quickly.
