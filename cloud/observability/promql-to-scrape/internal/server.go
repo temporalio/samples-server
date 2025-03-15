@@ -46,7 +46,11 @@ func (s *PromToScrapeServer) metricsHandler(w http.ResponseWriter, r *http.Reque
 	s.RLock()
 	defer s.RUnlock()
 	if time.Since(s.lastSuccessfulTime) < 5*time.Minute {
-		fmt.Fprint(w, s.data)
+		_, err := fmt.Fprint(w, s.data)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			slog.Error("can't serve metrics", "error", err)
+		}
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 		slog.Error("can't serve metrics", "error", "metrics queried are stale (more than 5 minutes old)")
@@ -71,7 +75,7 @@ func (s *PromToScrapeServer) run() string {
 //
 //	keep the objects returned from the query, or convert them into something a bit more ergonomic
 //	and create ConstMetrics with the prometheus client. I happened to have the code lying around for working
-//	with model.Sample, but the CosntMetrics route is probably more idiomatic and safe.
+//	with model.Sample, but the ConstMetrics route is probably more idiomatic and safe.
 func (s *PromToScrapeServer) queryMetrics() {
 	start := time.Now()
 	queriedMetrics, err := QueryMetrics(s.conf, s.client)
@@ -88,5 +92,6 @@ func (s *PromToScrapeServer) queryMetrics() {
 
 // Start runs the embedded http.Server.
 func (s *PromToScrapeServer) Start() error {
+	slog.Info("listening on", "addr", s.server.Addr)
 	return s.server.ListenAndServe()
 }

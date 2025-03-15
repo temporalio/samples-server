@@ -45,9 +45,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to pull metric names: %s", err)
 	}
-	fmt.Println(counters)
-	fmt.Println(gauges)
-	fmt.Println(histograms)
+	fmt.Println("counters: ", counters, "\n")
+	fmt.Println("gauges: ", gauges, "\n")
+	fmt.Println("histograms: ", histograms, "\n")
 
 	conf := internal.Config{}
 
