@@ -63,7 +63,7 @@ helm install promqltodd . \
 ## Verify promqltodd is running
 
 ```
-kubectl logs $(kubectl get pods | grep promqltodd | awk '{print $1; exit}') -f
+kubectl logs $(kubectl get pods | grep promql-to-dd-go | awk '{print $1; exit}') -f
 ```
 
 Should output:
