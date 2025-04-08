@@ -71,9 +71,10 @@ func (c *APIClient) ListMetrics(metricPrefix string) ([]string, []string, []stri
 		if !strings.HasPrefix(string(v), metricPrefix) {
 			continue
 		}
-		if strings.HasSuffix(string(v), "_bucket") {
+		t := getMetricType(string(v))
+		if t == metricTypeHistogram {
 			histograms = append(histograms, string(v))
-		} else if strings.HasSuffix(string(v), "_count") || strings.HasSuffix(string(v), "_sum") {
+		} else if t == metricTypeCounter {
 			counts = append(counts, string(v))
 		} else {
 			gauges = append(gauges, string(v))
