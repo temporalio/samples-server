@@ -45,7 +45,7 @@ func NewAPIClient(cfg Config) (*APIClient, error) {
 	}
 
 	httpClient := &http.Client{
-		Transport: &http.Transport{TLSClientConfig: tlsCfg},
+		Transport: &http.Transport{TLSClientConfig: tlsCfg, Proxy: http.ProxyFromEnvironment},
 	}
 
 	client, err := NewHttpClient(cfg.TargetHost, httpClient)
