@@ -5,6 +5,18 @@ services:
     image: cassandra:3.11
     ports:
       - "9042:9042"
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    ports:
+      - "9200:9200"
+    environment:
+      - "cluster.routing.allocation.disk.threshold_enabled=true"
+      - "cluster.routing.allocation.disk.watermark.low=512mb"
+      - "cluster.routing.allocation.disk.watermark.high=256mb"
+      - "cluster.routing.allocation.disk.watermark.flood_stage=128mb"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "xpack.security.enabled=false"
   temporal:
     image: temporalio/auto-setup:${SERVER_TAG:-latest}
     ports:
@@ -13,28 +25,25 @@ services:
       - ${DYNAMIC_CONFIG_DIR:-../config/dynamicconfig}:/etc/temporal/config/dynamicconfig
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
     environment:
-      - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
+      - "CASSANDRA_SEEDS=cassandra"
+      - "ENABLE_ES=true"
+      - "ES_SEEDS=elasticsearch"
       - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
+      - "SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true"
       - "TEMPORAL_TLS_SERVER_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_SERVER_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
       - "TEMPORAL_TLS_SERVER_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
       - "TEMPORAL_TLS_REQUIRE_CLIENT_AUTH=true"
-      - "TEMPORAL_TLS_FRONTEND_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
-      - "TEMPORAL_TLS_FRONTEND_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
       - "TEMPORAL_TLS_CLIENT1_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_CLIENT2_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
-      - "TEMPORAL_TLS_INTERNODE_SERVER_NAME=tls-sample"
+      - "TEMPORAL_TLS_FRONTEND_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
+      - "TEMPORAL_TLS_FRONTEND_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
       - "TEMPORAL_TLS_FRONTEND_SERVER_NAME=tls-sample"
       - "TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION=false"
+      - "TEMPORAL_TLS_INTERNODE_SERVER_NAME=tls-sample"
       - "TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION=false"
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
-      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
-      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
-      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
-      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
-      - "TEMPORAL_CLI_TLS_SERVER_NAME=tls-sample"
-      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_ADDRESS=temporal:7233"
       - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
       - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
@@ -42,6 +51,7 @@ services:
       - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
     depends_on:
       - cassandra
+      - elasticsearch
   temporal-ui:
     image: temporalio/ui:${UI_TAG:-latest}
     ports:
@@ -64,13 +74,7 @@ services:
     volumes:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
     environment:
-      - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
-      - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
-      - "TEMPORAL_CLI_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client.pem"
-      - "TEMPORAL_CLI_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client.key"
-      - "TEMPORAL_CLI_TLS_ENABLE_HOST_VERIFICATION=true"
-      - "TEMPORAL_CLI_TLS_SERVER_NAME=tls-sample"
-      - "TEMPORAL_ADDRESS=temporal:7233" # used by Temporal CLI
+      - "TEMPORAL_ADDRESS=temporal:7233"
       - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/client.pem"
       - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/client.key"

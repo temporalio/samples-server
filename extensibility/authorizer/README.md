@@ -6,13 +6,13 @@ The sample implementation of the authorizer interface `authorization.Authorizer`
 ### Steps to run this sample
 1. Start up the dependencies by running the `make start-dependencies` command from within the main Temporal repository as described in the [contribution guide](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md#run-temporal-server-locally).
 
-2. Create the database schema by running `make install-schema`.
+2. Create the database schema by running `make install-schema-cass-es`.
 
 3. Start Temporal by running `go run authorizer/server/main.go`.
 
-4. Use `tctl` to interact with Temporal
+4. Use `temporal` cli to interact with Temporal
 
-- Run `tctl n l` to list available namespaces. You should only see "temporal-system" initially.
-- Run `tctl --ns test n register` to create a namespace "test"
-- Run `tctl n l` to see "test" listed
-- Run `tctl --ns test n update` to try to update the "test" namespace. You should see a `PermissionDenied` error because `myAuthorizer` denies `UpdateNamespace` calls.
+- Run `temporal operator namespace list` to list available namespaces. You should only see "temporal-system" initially.
+- Run `temporal operator namespace create -n test` to create a namespace "test"
+- Run `temporal operator namespace list` to see "test" listed
+- Run `temporal operator namespace update -n test` to try to update the "test" namespace. You should see a `PermissionDenied` error because `myAuthorizer` denies `UpdateNamespace` calls.
