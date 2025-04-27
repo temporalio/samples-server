@@ -1,43 +1,57 @@
 metrics:
-    - metric_name: temporal_cloud_v0_frontend_service_error_count:rate1m
-      query: rate(temporal_cloud_v0_frontend_service_error_count[1m])
+    - metric_name: temporal_cloud_v0_frontend_service_error_count:rate2m
+      query: rate(temporal_cloud_v0_frontend_service_error_count[2m])
     - metric_name: temporal_cloud_v0_frontend_service_pending_requests
       query: temporal_cloud_v0_frontend_service_pending_requests
-    - metric_name: temporal_cloud_v0_frontend_service_request_count:rate1m
-      query: rate(temporal_cloud_v0_frontend_service_request_count[1m])
-    - metric_name: temporal_cloud_v0_poll_success_count:rate1m
-      query: rate(temporal_cloud_v0_poll_success_count[1m])
-    - metric_name: temporal_cloud_v0_poll_success_sync_count:rate1m
-      query: rate(temporal_cloud_v0_poll_success_sync_count[1m])
-    - metric_name: temporal_cloud_v0_poll_timeout_count:rate1m
-      query: rate(temporal_cloud_v0_poll_timeout_count[1m])
-    - metric_name: temporal_cloud_v0_resource_exhausted_error_count:rate1m
-      query: rate(temporal_cloud_v0_resource_exhausted_error_count[1m])
-    - metric_name: temporal_cloud_v0_schedule_action_success_count:rate1m
-      query: rate(temporal_cloud_v0_schedule_action_success_count[1m])
-    - metric_name: temporal_cloud_v0_schedule_buffer_overruns_count:rate1m
-      query: rate(temporal_cloud_v0_schedule_buffer_overruns_count[1m])
-    - metric_name: temporal_cloud_v0_schedule_missed_catchup_window_count:rate1m
-      query: rate(temporal_cloud_v0_schedule_missed_catchup_window_count[1m])
-    - metric_name: temporal_cloud_v0_service_latency_bucket:histogram_quantile_p99_1m
-      query: histogram_quantile(0.99, sum(rate(temporal_cloud_v0_service_latency_bucket[1m])) by (le, operation, temporal_namespace))
-    - metric_name: temporal_cloud_v0_service_latency_count:rate1m
-      query: rate(temporal_cloud_v0_service_latency_count[1m])
-    - metric_name: temporal_cloud_v0_service_latency_sum:rate1m
-      query: rate(temporal_cloud_v0_service_latency_sum[1m])
-    - metric_name: temporal_cloud_v0_state_transition_count:rate1m
-      query: rate(temporal_cloud_v0_state_transition_count[1m])
-    - metric_name: temporal_cloud_v0_total_action_count:rate1m
-      query: rate(temporal_cloud_v0_total_action_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_cancel_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_cancel_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_continued_as_new_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_continued_as_new_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_failed_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_failed_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_success_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_success_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_terminate_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_terminate_count[1m])
-    - metric_name: temporal_cloud_v0_workflow_timeout_count:rate1m
-      query: rate(temporal_cloud_v0_workflow_timeout_count[1m])
+    - metric_name: temporal_cloud_v0_frontend_service_request_count:rate2m
+      query: rate(temporal_cloud_v0_frontend_service_request_count[2m])
+    - metric_name: temporal_cloud_v0_poll_success_count:rate2m
+      query: rate(temporal_cloud_v0_poll_success_count[2m])
+    - metric_name: temporal_cloud_v0_poll_success_sync_count:rate2m
+      query: rate(temporal_cloud_v0_poll_success_sync_count[2m])
+    - metric_name: temporal_cloud_v0_poll_timeout_count:rate2m
+      query: rate(temporal_cloud_v0_poll_timeout_count[2m])
+    - metric_name: temporal_cloud_v0_resource_exhausted_error_count:rate2m
+      query: rate(temporal_cloud_v0_resource_exhausted_error_count[2m])
+    - metric_name: temporal_cloud_v0_schedule_action_success_count:rate2m
+      query: rate(temporal_cloud_v0_schedule_action_success_count[2m])
+    - metric_name: temporal_cloud_v0_schedule_buffer_overruns_count:rate2m
+      query: rate(temporal_cloud_v0_schedule_buffer_overruns_count[2m])
+    - metric_name: temporal_cloud_v0_schedule_missed_catchup_window_count:rate2m
+      query: rate(temporal_cloud_v0_schedule_missed_catchup_window_count[2m])
+    - metric_name: temporal_cloud_v0_service_latency_bucket:histogram_quantile_p99_2m
+      query: histogram_quantile(0.99, sum(rate(temporal_cloud_v0_service_latency_bucket[2m])) by (le, operation, temporal_namespace))
+    - metric_name: temporal_cloud_v0_service_latency_bucket_startworkflow_p50_2m
+      query: histogram_quantile(0.5, sum(rate(temporal_cloud_v0_service_latency_bucket[2m])) by (le, operation, temporal_namespace))
+    - metric_name: temporal_cloud_v0_service_latency_count:rate2m
+      query: rate(temporal_cloud_v0_service_latency_count[2m])
+    - metric_name: temporal_cloud_v0_service_latency_sum:rate2m
+      query: rate(temporal_cloud_v0_service_latency_sum[2m])
+    - metric_name: temporal_cloud_v0_state_transition_count:rate2m
+      query: rate(temporal_cloud_v0_state_transition_count[2m])
+    - metric_name: temporal_cloud_v0_state_transition_count:increase30d
+      query: increase(temporal_cloud_v0_state_transition_count[30d])
+    - metric_name: temporal_cloud_v0_state_transition_count:increase7d
+      query: increase(temporal_cloud_v0_state_transition_count[7d])
+    - metric_name: temporal_cloud_v0_state_transition_count:increase1d
+      query: increase(temporal_cloud_v0_state_transition_count[1d])
+    - metric_name: temporal_cloud_v0_total_action_count:rate2m
+      query: rate(temporal_cloud_v0_total_action_count[2m])
+    - metric_name: temporal_cloud_v0_total_action_count:increase30d
+      query: increase(temporal_cloud_v0_total_action_count[30d])
+    - metric_name: temporal_cloud_v0_total_action_count:increase7d
+      query: increase(temporal_cloud_v0_total_action_count[7d])
+    - metric_name: temporal_cloud_v0_total_action_count:increase1d
+      query: increase(temporal_cloud_v0_total_action_count[1d])
+    - metric_name: temporal_cloud_v0_workflow_cancel_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_cancel_count[2m])
+    - metric_name: temporal_cloud_v0_workflow_continued_as_new_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_continued_as_new_count[2m])
+    - metric_name: temporal_cloud_v0_workflow_failed_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_failed_count[2m])
+    - metric_name: temporal_cloud_v0_workflow_success_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_success_count[2m])
+    - metric_name: temporal_cloud_v0_workflow_terminate_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_terminate_count[2m])
+    - metric_name: temporal_cloud_v0_workflow_timeout_count:rate2m
+      query: rate(temporal_cloud_v0_workflow_timeout_count[2m])
