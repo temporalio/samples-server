@@ -1,0 +1,23 @@
+services:
+  temporal-validate:
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    container_name: temporal-validate
+    restart: on-failure:5
+    depends_on:
+      temporal-create-namespace:
+        condition: service_completed_successfully
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - NAMESPACE=default
+      - MAX_WAIT_TIME=300
+    networks:
+      - temporal-network
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["exec /scripts/validate-temporal.sh"]
+
+networks:
+  temporal-network:
+    external: true
+    name: temporal-network
