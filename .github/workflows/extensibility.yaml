@@ -5,9 +5,6 @@ on:
     paths:
       - 'extensibility/**'
 
-permissions:
-  contents: read
-
 jobs:
   extensibility-test:
     strategy:

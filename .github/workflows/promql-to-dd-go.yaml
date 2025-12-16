@@ -16,9 +16,6 @@ on:
       - '!cloud/observability/promql-to-dd-go/examples/**'
       - '!cloud/observability/promql-to-dd-go/helm-charts/**'
 
-permissions:
-  contents: read
-
 jobs:
   test:
     uses: ./.github/workflows/promql-to-dd-go_test.yaml
