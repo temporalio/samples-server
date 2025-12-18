@@ -1,4 +1,6 @@
-PromQL to Datadog Typescript
+⚠️ We recommend using Datadog's official [Temporal Cloud integration](https://docs.datadoghq.com/integrations/temporal_cloud/). ⚠️
+
+PromQL to Datadog Typescript (deprecated)
 =================
 
 The goal of this TS implementation is to demonstrate the minimum work necessary to read recently generated metrics from a Temporal Cloud account using the Prometheus API and import them into DataDog while handling some common edge and error cases.
