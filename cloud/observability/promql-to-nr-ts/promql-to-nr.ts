@@ -168,7 +168,7 @@ const convertPrometheusCountToNewRelicCountMetrics = (
     prometheusMetric.values.map((v) => ({
       name: NEWRELIC_METRIC_PREFIX + metricName.split("_count")[0] + "_rate1m",
       type: "count",
-      value: parseInt(v[1]),
+      value: parseFloat(v[1]),
       timestamp: v[0],
       "interval.ms": PROMETHEUS_STEP_SECONDS * 1000,
       attributes: _.omit(prometheusMetric.metric, "__rollup__"),
@@ -284,16 +284,8 @@ const main = async () => {
 main().catch((error) => {
   console.log({
     level: "error",
-    message: "Error in main loop. Closing healthcheck server.",
+    message: "Error in main loop. Shutting down metrics service.",
     error,
   });
-
-  server.close(() => {
-    console.log({
-      level: "info",
-      message: "Healthcheck server closed",
-    });
-
-    process.exit(1);
-  });
+  process.exit(1);
 });
