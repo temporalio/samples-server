@@ -7,3 +7,4 @@ image:
   tag: latest
   imagePullPolicy: Always
 query_interval_seconds: 15
+dd_site: ""
