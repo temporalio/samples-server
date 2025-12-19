@@ -22,6 +22,7 @@ func main() {
 	matrixPrefix := set.String("matrix-prefix", "temporal_cloud_", "Prefix of the metrics to be queried and send to Datadog")
 	stepDuration := set.Int("step-duration-seconds", 60, "The step between metrics")
 	queryInterval := set.Int("query-interval-seconds", 600, "Interval between each Prometheus query")
+	sleepDuration := set.Int("sleep-duration-seconds", 60, "Sleep duration between each data submission")
 
 	if err := set.Parse(os.Args[1:]); err != nil {
 		log.Fatalf("failed parsing args: %s", err)
@@ -51,6 +52,7 @@ func main() {
 		MetricPrefix:  *matrixPrefix,
 		StepDuration:  time.Duration(*stepDuration) * time.Second,
 		QueryInterval: time.Duration(*queryInterval) * time.Second,
+		SleepDuration: time.Duration(*sleepDuration) * time.Second,
 		Quantiles:     []float64{0.5, 0.9, 0.95, 0.99},
 	}
 

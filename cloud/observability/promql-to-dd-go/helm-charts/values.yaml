@@ -6,3 +6,4 @@ image:
   repository: ghcr.io/temporalio/promql-to-dd-go
   tag: latest
   imagePullPolicy: Always
+query_interval_seconds: 15

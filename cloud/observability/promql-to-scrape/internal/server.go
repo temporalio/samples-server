@@ -44,7 +44,7 @@ func NewPromToScrapeServer(client *APIClient, conf *Config, addr string) *PromTo
 // metricsHandler is the HTTP handler for the "/metrics" endpoint.
 func (s *PromToScrapeServer) metricsHandler(w http.ResponseWriter, r *http.Request) {
 	s.RLock()
-	defer s.Unlock()
+	defer s.RUnlock()
 	if time.Since(s.lastSuccessfulTime) < 5*time.Minute {
 		fmt.Fprint(w, s.data)
 	} else {

@@ -19,6 +19,7 @@ type Worker struct {
 	Quantiles     []float64
 	QueryInterval time.Duration
 	StepDuration  time.Duration
+	SleepDuration time.Duration
 }
 
 const (
@@ -29,7 +30,7 @@ const (
 
 func (w *Worker) Run() {
 	interrupt := interruptCh()
-	ticker := time.NewTicker(w.QueryInterval)
+	ticker := time.NewTicker(w.SleepDuration)
 	defer ticker.Stop()
 	errs := make(chan error, 1)
 
@@ -100,7 +101,7 @@ func (w *Worker) do(errorChan chan<- error) {
 		return
 	}
 	log.Printf("Submitted total of %d series\n", len(series))
-	log.Printf("Awaits next tick (interval: %.0f seconds)\n", w.QueryInterval.Seconds())
+	log.Printf("Awaits next tick (interval: %.0f seconds)\n", w.SleepDuration.Seconds())
 }
 
 func (w *Worker) calcRange() promapi.Range {
