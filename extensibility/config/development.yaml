@@ -1,16 +1,23 @@
 persistence:
   defaultStore: cass-default
-  visibilityStore: cass-visibility
+  visibilityStore: es-visibility
   numHistoryShards: 4
   datastores:
     cass-default:
       cassandra:
         hosts: "127.0.0.1"
         keyspace: "temporal"
-    cass-visibility:
-      cassandra:
-        hosts: "127.0.0.1"
-        keyspace: "temporal_visibility"
+    es-visibility:
+      elasticsearch:
+        version: "v7"
+        logLevel: "error"
+        url:
+          scheme: "http"
+          host: "127.0.0.1:9200"
+        indices:
+          visibility: temporal_visibility_v1_dev
+          # secondary_visibility: temporal_visibility_v1_secondary
+        closeIdleConnectionsInterval: 15s
 global:
   membership:
     maxJoinDuration: 30s
@@ -101,19 +108,6 @@ namespaceDefaults:
     visibility:
       state: "disabled"
       URI: "file:///tmp/temporal_vis_archival/development"
-
-kafka:
-  tls:
-    enabled: false
-  clusters:
-    test:
-      brokers:
-        - 127.0.0.1:9092
-  topics:
-    temporal-visibility-dev:
-      cluster: test
-    temporal-visibility-dev-dlq:
-      cluster: test
 
 publicClient:
   hostPort: "localhost:7233"
