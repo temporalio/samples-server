@@ -2,8 +2,7 @@ module github.com/temporalio/service-samples
 
 go 1.25.0
 
-
-require go.temporal.io/server v1.29.1
+require go.temporal.io/server v1.29.2
 
 require (
 	cel.dev/expr v0.20.0 // indirect
