@@ -30,6 +30,14 @@ import (
 	"go.temporal.io/server/common/metrics"
 )
 
+type consoleBatchHandler struct {
+	*consoleMetricsHandler
+}
+
+func (b *consoleBatchHandler) Close() error {
+	return nil
+}
+
 type (
 	// Replace this implementation with your code.
 	consoleMetricsHandler struct {
@@ -78,6 +86,10 @@ func (h consoleMetricsHandler) Histogram(name string, mUnit metrics.MetricUnit) 
 }
 
 func (h consoleMetricsHandler) Stop(l tlog.Logger) {
+}
+
+func (h *consoleMetricsHandler) StartBatch(scope string) metrics.BatchHandler {
+	return &consoleBatchHandler{consoleMetricsHandler: h}
 }
 
 func doPrint(src printFormat) {
