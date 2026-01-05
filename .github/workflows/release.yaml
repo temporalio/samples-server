@@ -1,0 +1,154 @@
+name: Create a release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag for new version (1.23.4)"
+        required: true
+      admintools_tag:
+        description: "Admin tools version (1.23.4-tctl-1.0-cli-1.0)"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release:
+    name: Create a release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.TEMPORAL_CICD_APP_ID }}
+          private-key: ${{ secrets.TEMPORAL_CICD_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+          token: ${{ steps.generate_token.outputs.token }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Github credentials
+        run: |
+          git config --local user.name 'Temporal Data'
+          git config --local user.email 'commander-data@temporal.io'
+
+      - name: Update images version and create PR
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          TAG: ${{ github.event.inputs.tag }}
+          ADMINTOOLS_TAG: ${{ github.event.inputs.admintools_tag }}
+        run: |
+          sed -i -e "s/^TEMPORAL_VERSION=.*$/TEMPORAL_VERSION=$TAG/g" compose/.env
+          sed -i -e "s/^TEMPORAL_ADMINTOOLS_VERSION=.*$/TEMPORAL_ADMINTOOLS_VERSION=$ADMINTOOLS_TAG/g" compose/.env
+
+          if [ -z "$(git diff --stat)" ]; then
+            echo "No changes to commit"
+            echo "SKIPPED=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BRANCH="release/v${TAG}"
+          git checkout -b "$BRANCH"
+          git add .
+          git commit -m "Bump Server version to $TAG"
+          git push origin "$BRANCH"
+
+          gh repo set-default ${{ github.repository }}
+          PR_URL=$(gh pr create \
+            --title "Bump Server version to $TAG" \
+            --body "Automated version bump for release v${TAG}" \
+            --base main \
+            --head "$BRANCH")
+          echo "PR_URL=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-merge PR
+        if: steps.create_pr.outputs.SKIPPED != 'true'
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
+        run: |
+          gh pr merge "$PR_URL" --auto --squash --delete-branch
+
+      - name: Wait for PR to merge
+        if: steps.create_pr.outputs.SKIPPED != 'true'
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
+        run: |
+          echo "Waiting for PR to merge (checks may take ~10 minutes)..."
+          for _ in {1..90}; do
+            STATE=$(gh pr view "$PR_URL" --json state --jq '.state')
+            if [ "$STATE" = "MERGED" ]; then
+              echo "PR merged successfully"
+              exit 0
+            elif [ "$STATE" = "CLOSED" ]; then
+              echo "::error::PR was closed without merging"
+              exit 1
+            fi
+            echo "PR state: $STATE, waiting..."
+            sleep 10
+          done
+          echo "::error::Timed out waiting for PR to merge"
+          exit 1
+
+      - name: Checkout main after merge
+        if: steps.create_pr.outputs.SKIPPED != 'true'
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      - name: Create and push tag
+        env:
+          TAG: 'v${{ github.event.inputs.tag }}'
+        run: |
+          if [ -z "$(git tag -l "$TAG")" ]; then
+            git tag "$TAG"
+            git push origin "$TAG"
+          elif [ "$(git rev-list -n 1 "$TAG")" != "$(git rev-parse HEAD)" ]; then
+            echo "::error::Tag already exists and it doesn't reference current HEAD of main branch"
+            exit 1
+          fi
+
+      - name: Create draft release
+        id: release_notes
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          TAG: 'v${{ github.event.inputs.tag }}'
+        run: |
+          TEMPFILE=$(mktemp)
+          cat > "$TEMPFILE" <<- EOF
+          # Release Highlights
+          Please check [main repo](https://github.com/temporalio/temporal/releases/tag/${TAG}) release notes.
+          EOF
+
+          gh repo set-default ${{ github.repository }}
+          RELEASE_URL=$(gh release create "$TAG" --verify-tag --draft --title "$TAG" -F "$TEMPFILE")
+          echo "RELEASE_URL=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Create summary
+        env:
+          PR_URL: ${{ steps.create_pr.outputs.PR_URL }}
+        run: |
+          TEMPFILE=$(mktemp)
+          cat > "$TEMPFILE" <<- EOF
+          # Job summary
+          PR: ${PR_URL:-"No changes needed"}
+          Draft release: ${{ steps.release_notes.outputs.RELEASE_URL }}
+          EOF
+
+          cat "$TEMPFILE" >> "$GITHUB_STEP_SUMMARY"
