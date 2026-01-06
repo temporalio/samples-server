@@ -7,8 +7,7 @@ There are a variety of docker-compose files, each utilizing a different set of d
 
 To use these files, you must first have the following installed:
 
-- [Docker](https://docs.docker.com/engine/installation/)
-- [docker-compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/engine/install/) (includes Docker Compose)
 
 ## How to use
 
@@ -16,32 +15,32 @@ The following steps will run a local instance of the Temporal Server using the d
 
 1. Clone this repository.
 2. Change directory into the root of the project.
-3. Run the `docker-compose up` command.
+3. Run the `docker compose up` command.
 
 ```bash
 git clone https://github.com/temporalio/samples-server.git
 cd samples-server/compose
-docker-compose up
+docker compose up
 ```
-
-> ⚠️ If you are on an M1 Mac, note that Temporal v1.12 to v1.14 had fatal issues with ARM builds. v1.14.2 onwards should be fine for M1 Macs.
 
 After the Server has started, you can open the Temporal Web UI in your browser: [http://localhost:8080](http://localhost:8080).
 
-You can also interact with the Server using a preconfigured CLI (tctl).
-First create an alias for `tctl`:
+You can also interact with the Server using the [Temporal CLI](https://docs.temporal.io/cli).
+
+To install the Temporal CLI:
 
 ```bash
-alias tctl="docker exec temporal-admin-tools tctl"
+# macOS (Homebrew)
+brew install temporal
+
+# Other platforms - see https://docs.temporal.io/cli#install
 ```
 
-The following is an example of how to register a new namespace `test-namespace` with 1 day of retention:
+The following is an example of how to create a new namespace `test-namespace` with 1 day of retention:
 
 ```bash
-tctl --ns test-namespace namespace register -rd 1
+temporal operator namespace create --namespace test-namespace --retention 1d
 ```
-
-You can find our `tctl` docs on [docs.temporal.io](https://docs.temporal.io/docs/system-tools/tctl/).
 
 Get started building Workflows with a [Go sample](https://github.com/temporalio/samples-go), [Java sample](https://github.com/temporalio/samples-java), or write your own using one of the [SDKs](https://docs.temporal.io/docs/sdks-introduction).
 
@@ -49,24 +48,25 @@ Get started building Workflows with a [Go sample](https://github.com/temporalio/
 
 The default configuration file (`docker-compose.yml`) uses a PostgreSQL database, an Elasticsearch instance, and exposes the Temporal gRPC Frontend on port 7233.
 The other configuration files in the repo spin up instances of the Temporal Server using different databases and dependencies.
-For example you can run the Temporal Server with MySQL and Elastic Search with this command:
+For example you can run the Temporal Server with MySQL and Elasticsearch with this command:
 
 ```bash
-docker-compose -f docker-compose-mysql-es.yml up
+docker compose -f docker-compose-mysql-es.yml up
 ```
 
 Here is a list of available files and the dependencies they use.
 
-| File                                   | Description                                                   |
-|----------------------------------------|---------------------------------------------------------------|
-| docker-compose.yml                     | PostgreSQL and Elasticsearch (default)                        |
-| docker-compose-tls.yml                 | PostgreSQL and Elasticsearch with TLS                         |
-| docker-compose-postgres.yml            | PostgreSQL                                                    |
-| docker-compose-cass-es.yml             | Cassandra and Elasticsearch                                   |
-| docker-compose-mysql.yml               | MySQL                                                         |
-| docker-compose-mysql-es.yml            | MySQL and Elasticsearch                                       |
-| docker-compose-postgres-opensearch.yml | PostgreSQL and OpenSearch                                     |
-| docker-compose-multirole.yml           | PostgreSQL and Elasticsearch with mult-role Server containers |
+| File                                   | Description                                                    |
+|----------------------------------------|----------------------------------------------------------------|
+| docker-compose-dev.yml                 | Development server with local file storage (UI on port 8233)   |
+| docker-compose.yml                     | PostgreSQL and Elasticsearch (default)                         |
+| docker-compose-tls.yml                 | PostgreSQL and Elasticsearch with TLS                          |
+| docker-compose-postgres.yml            | PostgreSQL                                                     |
+| docker-compose-cass-es.yml             | Cassandra and Elasticsearch                                    |
+| docker-compose-mysql.yml               | MySQL                                                          |
+| docker-compose-mysql-es.yml            | MySQL and Elasticsearch                                        |
+| docker-compose-postgres-opensearch.yml | PostgreSQL and OpenSearch                                      |
+| docker-compose-multirole.yaml          | PostgreSQL and Elasticsearch with multi-role Server containers |
 
 ### Using multi-role configuration
 
@@ -91,44 +91,26 @@ Some exposed endpoints:
 
 `docker-compose.yml` includes the Temporal Web UI.
 
-If you run command:
+If you run:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
-You access the Temporal Web UI at http://localhost:8080.
+You can access the Temporal Web UI at http://localhost:8080.
 
 ### Enabling metrics (with Grafana and Prometheus)
 
-We maintain two example docker-compose setups with server metrics enabled, and Prometheus and Grafana with [our Server and SDK dashboards](https://github.com/temporalio/dashboards):
-
-- https://github.com/tsurdilo/my-temporal-dockercompose
-- https://github.com/temporalio/background-checks
+The `docker-compose-multirole.yaml` configuration includes Prometheus and Grafana with [Server and SDK dashboards](https://github.com/temporalio/dashboards). See the [Using multi-role configuration](#using-multi-role-configuration) section above.
 
 ### Use a custom image configuration
 
-If you want, you can even use a custom Docker image of the Temporal Server.
+If you want to build a custom Docker image of the Temporal Server, refer to the [docker-build-manual workflow](https://github.com/temporalio/temporal/blob/main/.github/workflows/docker-build-manual.yml) in the Temporal repository for the current build process.
 
-Clone the main Temporal Server repo: [https://github.com/temporalio/temporal](https://github.com/temporalio/temporal):
-
-```bash
-git clone https://github.com/temporalio/temporal.git
-```
-
-In the following command, replace **<YOUR_TAG>** and **<YOUR_COMMIT>** to build the custom Docker image:
+Once you have a custom image, replace the `TEMPORAL_VERSION` value in the `.env` file with your custom tag, then run:
 
 ```bash
-git checkout <YOUR_COMMIT>
-docker build . -t temporalio/server:<YOUR_TAG> --build-arg TARGET=server
-```
-
-Next, in the `docker-compose.yml` file, replace the `TEMPORAL_VERSION` value in the `.env` file with **<YOUR_TAG>**.
-
-Then run the `docker-compose up` command:
-
-```bash
-docker-compose up
+docker compose up
 ```
 
 ## Using Temporal docker images in production
@@ -177,4 +159,3 @@ The docker-compose files in this repository work with both pre-v1.30 and v1.30+ 
 3. **Schema management**: Setup scripts detect and use new tools when available, with fallback to legacy methods
 
 For customizing server configuration beyond environment variables, refer to the appropriate template file for your server version.
-
