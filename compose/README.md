@@ -133,6 +133,8 @@ docker run -e CASSANDRA_SEEDS=10.x.x.x                  -- csv of Cassandra serv
     temporalio/server:<tag>
 ```
 
+For Kubernetes deployments, see the [Temporal Helm Charts](https://github.com/temporalio/helm-charts) repository.
+
 ## Server Configuration Templates
 
 The Temporal Server uses a base configuration template that defines the structure for persistence, visibility, and other settings.
