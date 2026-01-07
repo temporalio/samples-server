@@ -14,7 +14,7 @@ To use these files, you must first have the following installed:
 The following steps will run a local instance of the Temporal Server using the default configuration file (`docker-compose.yml`):
 
 1. Clone this repository.
-2. Change directory into the root of the project.
+2. Change directory into the `compose` folder.
 3. Run the `docker compose up` command.
 
 ```bash
@@ -24,6 +24,12 @@ docker compose up
 ```
 
 After the Server has started, you can open the Temporal Web UI in your browser: [http://localhost:8080](http://localhost:8080).
+
+To stop and remove containers and volumes:
+
+```bash
+docker compose down -v
+```
 
 You can also interact with the Server using the [Temporal CLI](https://docs.temporal.io/cli).
 
@@ -42,9 +48,19 @@ The following is an example of how to create a new namespace `test-namespace` wi
 temporal operator namespace create --namespace test-namespace --retention 1d
 ```
 
-Get started building Workflows with a [Go sample](https://github.com/temporalio/samples-go), [Java sample](https://github.com/temporalio/samples-java), or write your own using one of the [SDKs](https://docs.temporal.io/docs/sdks-introduction).
+Get started building Workflows with the SDK samples:
 
-### Other configuration files
+- [Go](https://github.com/temporalio/samples-go)
+- [Java](https://github.com/temporalio/samples-java)
+- [Python](https://github.com/temporalio/samples-python)
+- [TypeScript](https://github.com/temporalio/samples-typescript)
+- [.NET](https://github.com/temporalio/samples-dotnet)
+- [PHP](https://github.com/temporalio/samples-php)
+- [Ruby](https://github.com/temporalio/samples-ruby)
+
+For the most up-to-date SDK references, see [https://docs.temporal.io/develop](https://docs.temporal.io/develop).
+
+## Other configuration files
 
 The default configuration file (`docker-compose.yml`) uses a PostgreSQL database, an Elasticsearch instance, and exposes the Temporal gRPC Frontend on port 7233.
 The other configuration files in the repo spin up instances of the Temporal Server using different databases and dependencies.
@@ -68,9 +84,11 @@ Here is a list of available files and the dependencies they use.
 | docker-compose-postgres-opensearch.yml | PostgreSQL and OpenSearch                                      |
 | docker-compose-multirole.yaml          | PostgreSQL and Elasticsearch with multi-role Server containers |
 
-### Using multi-role configuration
+## Using multi-role configuration
 
-First install the loki plugin (this is one time operation)
+The `docker-compose-multirole.yaml` configuration runs each Temporal service separately and includes Prometheus and Grafana with [Server and SDK dashboards](https://github.com/temporalio/dashboards).
+
+First install the Loki plugin (this is a one-time operation)
 ```bash
 docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
 ```
@@ -87,57 +105,16 @@ Some exposed endpoints:
 - http://localhost:9090/targets - Prometheus targets
 - http://localhost:8000/metrics - Server metrics
 
-### Using the web interface
+## Production deployments
 
-`docker-compose.yml` includes the Temporal Web UI.
+These docker-compose setups are intended for local development and testing. For production deployments:
 
-If you run:
-
-```bash
-docker compose up
-```
-
-You can access the Temporal Web UI at http://localhost:8080.
-
-### Enabling metrics (with Grafana and Prometheus)
-
-The `docker-compose-multirole.yaml` configuration includes Prometheus and Grafana with [Server and SDK dashboards](https://github.com/temporalio/dashboards). See the [Using multi-role configuration](#using-multi-role-configuration) section above.
-
-### Use a custom image configuration
-
-If you want to build a custom Docker image of the Temporal Server, refer to the [docker-build-manual workflow](https://github.com/temporalio/temporal/blob/main/.github/workflows/docker-build-manual.yml) in the Temporal repository for the current build process.
-
-Once you have a custom image, replace the `TEMPORAL_VERSION` value in the `.env` file with your custom tag, then run:
-
-```bash
-docker compose up
-```
-
-## Using Temporal docker images in production
-
-These docker-compose setups use the `temporalio/server` image with a separate initialization step to set up database schemas. The `temporal-admin-tools` service runs once to create and initialize the database schema, then the `temporal` service starts using `temporalio/server`.
-
-In a typical production setting, dependencies such as `cassandra` or `elasticsearch` are managed/started independently of the Temporal server, and schemas are set up as part of your deployment process rather than at startup.
-
-To use the `temporalio/server` container in a production setting, use the following command:
-
-```plain
-docker run -e CASSANDRA_SEEDS=10.x.x.x                  -- csv of Cassandra server ipaddrs
-    -e KEYSPACE=<keyspace>                              -- Cassandra keyspace
-    -e VISIBILITY_KEYSPACE=<visibility_keyspace>        -- Cassandra visibility keyspace
-    -e SKIP_SCHEMA_SETUP=true                           -- do not setup Cassandra schema during startup
-    -e NUM_HISTORY_SHARDS=1024  \                       -- Number of history shards
-    -e SERVICES=history,matching \                      -- Spin-up only the provided services
-    -e LOG_LEVEL=debug,info \                           -- Logging level
-    -e DYNAMIC_CONFIG_FILE_PATH=config/foo.yaml         -- Dynamic config file to be watched
-    temporalio/server:<tag>
-```
-
-For Kubernetes deployments, see the [Temporal Helm Charts](https://github.com/temporalio/helm-charts) repository.
+- **Kubernetes**: Use the [Temporal Helm Charts](https://github.com/temporalio/helm-charts) repository
+- **Schema setup**: Reference the [setup scripts](./scripts/) in this repository for database schema initialization examples
 
 ## Server Configuration Templates
 
-The Temporal Server uses a base configuration template that defines the structure for persistence, visibility, and other settings.
+The Temporal Server uses a base configuration template that defines the structure for persistence, visibility, and other settings. These templates use [Sprig](https://masterminds.github.io/sprig/) for templating, which provides functions for string manipulation, environment variable access, and more.
 
 ### Configuration template location by version
 
