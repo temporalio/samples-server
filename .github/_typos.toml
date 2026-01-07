@@ -1,0 +1,26 @@
+# Configuration for typos spell checker
+# See: https://github.com/crate-ci/typos
+
+[default.extend-words]
+# "gauge" is correct for metrics (typos incorrectly suggests "gage")
+Gauge = "Gauge"
+gauge = "gauge"
+
+[default]
+extend-ignore-re = [
+  # Line ignore: // typos:disable-line or # typos:disable-line
+  "(?Rm)^.*(#|//)\\s*typos:disable-line$",
+  # Block ignore: // typos:off ... // typos:on
+  "(?s)(#|//)\\s*typos:off.*?\\n\\s*(#|//)\\s*typos:on",
+  # Next-line ignore: // typos:ignore-next-line
+  "(#|//)\\s*typos:ignore-next-line\\n.*",
+]
+
+[files]
+extend-exclude = [
+  "*.pb.go",
+  "*.gen.go",
+  "**/testdata/**",
+  "*.svg",
+  "go.sum",
+]

@@ -57,7 +57,7 @@ func TestPromHistogramToDatadogGauge(t *testing.T) {
 			},
 		},
 		{
-			name:       "contains NaN vlaues",
+			name:       "contains NaN values",
 			metricName: "latency",
 			quantile:   0.5,
 			matrix: model.Matrix{

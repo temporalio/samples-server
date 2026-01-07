@@ -420,7 +420,7 @@
           {
             "id": 6576468107016944,
             "definition": {
-              "title": "StartWorkflowExecutino Latency",
+              "title": "StartWorkflowExecution Latency",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,

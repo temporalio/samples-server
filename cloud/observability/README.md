@@ -95,7 +95,7 @@ sequenceDiagram
         Gathering ->> Temporal Server: scrape
         Gathering ->> Processing: push
     end 
-    Note right of Processing: Gathering is<br>gobally distributed<br>and pushed at<br>various times
+    Note right of Processing: Gathering is<br>globally distributed<br>and pushed at<br>various times
     loop 30s interval
         Processing ->> Processing: aggregate
             Note right of Processing: Aggregation is over<br>a look back

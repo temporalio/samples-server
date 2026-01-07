@@ -188,7 +188,7 @@ const queryPrometheusHistogram = async (
     return queryResponseDataSchema.parse(response.data).data
 }
 
-const convertPrometheusHistogramToDatadogGuageSeries = (
+const convertPrometheusHistogramToDatadogGaugeSeries = (
     metricName: string,
     quantile: number,
     metricData: MetricData,
@@ -196,7 +196,7 @@ const convertPrometheusHistogramToDatadogGuageSeries = (
     metricData.result.map(prometheusMetric => ({
         // Make it easier for the datadog user to understand what this metric is
         metric: DATADOG_METRIC_PREFIX + metricName.split('_bucket')[0] + '_P' + quantile * 100,
-        // Type 2 is a "guage" metric
+        // Type 3 is a "gauge" metric
         type: 3,
         points: prometheusMetric.values.map(([timestamp, value]) => {
             return {
@@ -246,9 +246,9 @@ const main = async () => {
             ),
         )).flat()
 
-        const guageSeries = (await Promise.all(histogramMetricNames.map(async metricName =>
+        const gaugeSeries = (await Promise.all(histogramMetricNames.map(async metricName =>
             Promise.all(HISTOGRAM_QUANTILES.map(async quantile =>
-                convertPrometheusHistogramToDatadogGuageSeries(
+                convertPrometheusHistogramToDatadogGaugeSeries(
                     metricName,
                     quantile,
                     await queryPrometheusHistogram(metricName, quantile, generateQueryWindow())
@@ -259,7 +259,7 @@ const main = async () => {
         console.log({ level: 'info', message: 'Submitting metrics to Datadog' })
         await datadogMetricsApi.submitMetrics({ body: { series: [
                     ...countSeries,
-                    ...guageSeries,
+                    ...gaugeSeries,
                 ]}})
 
         console.log({ level: 'info', message: 'Pausing for 20s' })

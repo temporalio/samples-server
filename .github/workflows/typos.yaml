@@ -1,0 +1,20 @@
+name: Spell Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  typos:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.28.4
+        with:
+          config: .github/_typos.toml

@@ -3,7 +3,7 @@
 promql-to-dd.py - Import counters and histograms from prometheus api endpoint into datadog
 
 While this demonstrates how to import prometheus api data using the datadog metrics API,
-there is a lot of room for improvement in terms of efficency and error handling.
+there is a lot of room for improvement in terms of efficiency and error handling.
 
 To view this data in DataDog Metrics:
 * use sum and as_rate for rate metrics
@@ -105,7 +105,7 @@ def retryable_submit_metrics(datadog_api: MetricsApi, body: MetricPayload):
 
 def submit_datadog_series(datadog_api: MetricsApi, series: Iterable):
     print(f"{datetime.now()}: Ingesting {len(series)} series into DataDog")
-    # submit 200 series at a time as a naieve optimization
+    # submit 200 series at a time as a naive optimization
     # this could be tuned to submit upto 5MB of metrics
     # data compressed to a size of upto 512KB
     non_empty_responses = []
