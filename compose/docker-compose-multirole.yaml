@@ -372,8 +372,6 @@ services:
         target: 13133
       - published: 4317
         target: 4317
-      - published: 55670
-        target: 55670
     depends_on:
       - jaeger-all-in-one
     networks:
