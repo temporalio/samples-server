@@ -1,4 +1,5 @@
 #!/bin/sh
+# @@@SNIPSTART compose-postgres-setup
 set -eu
 
 echo 'Starting PostgreSQL schema setup...'
@@ -17,3 +18,4 @@ temporal-sql-tool --plugin postgres12 --ep postgresql -u temporal -p 5432 --db t
 temporal-sql-tool --plugin postgres12 --ep postgresql -u temporal -p 5432 --db temporal_visibility update-schema -d /etc/temporal/schema/postgresql/v12/visibility/versioned
 
 echo 'PostgreSQL schema setup complete'
+# @@@SNIPEND

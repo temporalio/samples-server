@@ -1,4 +1,5 @@
 #!/bin/sh
+# @@@SNIPSTART compose-mysql-es-setup
 set -eu
 
 # Validate required environment variables
@@ -52,3 +53,4 @@ else
 fi
 
 echo 'MySQL and Elasticsearch setup complete'
+# @@@SNIPEND
