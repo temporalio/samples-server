@@ -1,4 +1,5 @@
 #!/bin/sh
+# @@@SNIPSTART compose-mysql-setup
 set -eu
 
 echo 'Starting MySQL schema setup...'
@@ -17,3 +18,4 @@ temporal-sql-tool --plugin mysql8 --ep mysql -u root -p 3306 --db temporal_visib
 temporal-sql-tool --plugin mysql8 --ep mysql -u root -p 3306 --db temporal_visibility update-schema -d /etc/temporal/schema/mysql/v8/visibility/versioned
 
 echo 'MySQL schema setup complete'
+# @@@SNIPEND
