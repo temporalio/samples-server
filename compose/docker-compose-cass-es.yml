@@ -1,0 +1,123 @@
+services:
+  cassandra:
+    image: cassandra:${CASSANDRA_VERSION}
+    container_name: temporal-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_LISTEN_ADDRESS: 127.0.0.1
+    networks:
+      - temporal-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  elasticsearch:
+    image: elasticsearch:${ELASTICSEARCH_VERSION}
+    container_name: temporal-elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    networks:
+      - temporal-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  temporal-admin-tools:
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    container_name: temporal-admin-tools
+    restart: on-failure:6
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - CASSANDRA_SEEDS=cassandra
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - ES_SCHEME=http
+      - ES_VERSION=v7
+      - ES_VISIBILITY_INDEX=temporal_visibility_v1_dev
+    networks:
+      - temporal-network
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["/bin/sh"]
+    command: /scripts/setup-cassandra-es.sh
+
+  temporal:
+    image: temporalio/server:${TEMPORAL_VERSION}
+    container_name: temporal
+    depends_on:
+      temporal-admin-tools:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_SEEDS=cassandra
+      - ENABLE_ES=true
+      - ES_SEEDS=elasticsearch
+      - ES_VERSION=v7
+      - BIND_ON_IP=0.0.0.0
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-cass.yaml
+    networks:
+      - temporal-network
+    ports:
+      - '7233:7233'
+    volumes:
+      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "7233"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 60
+
+  temporal-create-namespace:
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    container_name: temporal-create-namespace
+    restart: on-failure:5
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - DEFAULT_NAMESPACE=default
+    networks:
+      - temporal-network
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["/bin/sh"]
+    command: /scripts/create-namespace.sh
+
+  temporal-ui:
+    container_name: temporal-ui
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    image: temporalio/ui:${TEMPORAL_UI_VERSION}
+    networks:
+      - temporal-network
+    ports:
+      - 8080:8080
+
+networks:
+  temporal-network:
+    driver: bridge
+    name: temporal-network

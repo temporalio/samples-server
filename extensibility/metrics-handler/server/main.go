@@ -35,7 +35,7 @@ import (
 func main() {
 	s, err := temporal.NewServer(
 		temporal.ForServices(temporal.DefaultServices),
-		temporal.WithConfigLoader("./metrics-handler/config", "development", ""),
+		temporal.WithServerConfigFilePath("./metrics-handler/config/development.yaml"),
 		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithCustomMetricsHandler(metrics_handler.NewConsoleMetricsHandler()),
 	)

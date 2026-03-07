@@ -1,4 +1,6 @@
-PromQL to Datadog Go
+⚠️ We recommend using Datadog's official Temporal Cloud integration: https://docs.datadoghq.com/integrations/temporal_cloud/ over this stop-gap legacy solution.
+
+PromQL to Datadog Go (Legacy)
 =================
 
 The goal of this Golang implementation is to demonstrate the minimum work necessary to read recently generated metrics from a Temporal Cloud account using the Prometheus API and import them into DataDog while handling some common edge and error cases.
@@ -61,7 +63,7 @@ helm install promqltodd . \
 ## Verify promqltodd is running
 
 ```
-kubectl logs $(kubectl get pods | grep promqltodd | awk '{print $1; exit}') -f
+kubectl logs $(kubectl get pods | grep promql-to-dd-go | awk '{print $1; exit}') -f
 ```
 
 Should output:
