@@ -7,22 +7,23 @@ set -eu
 : "${ES_PORT:?ERROR: ES_PORT environment variable is required}"
 : "${ES_VISIBILITY_INDEX:?ERROR: ES_VISIBILITY_INDEX environment variable is required}"
 : "${ES_VERSION:?ERROR: ES_VERSION environment variable is required}"
+: "${CASSANDRA_SEEDS:?ERROR: CASSANDRA_SEEDS environment variable is required}"
 
 echo 'Starting Cassandra and Elasticsearch schema setup...'
 echo 'Waiting for Cassandra port to be available...'
-nc -z -w 10 cassandra 9042
+nc -z -w 10 ${CASSANDRA_SEEDS} 9042
 echo 'Cassandra port is available'
 echo 'Waiting for Cassandra to be ready...'
-until temporal-cassandra-tool --ep cassandra validate-health; do
+until temporal-cassandra-tool --ep ${CASSANDRA_SEEDS} validate-health; do
   echo 'Cassandra not ready yet, waiting...'
   sleep 2
 done
 echo 'Cassandra is ready'
 
 # Create and setup Cassandra keyspace
-temporal-cassandra-tool --ep cassandra create -k temporal --rf 1
-temporal-cassandra-tool --ep cassandra -k temporal setup-schema -v 0.0
-temporal-cassandra-tool --ep cassandra -k temporal update-schema -d /etc/temporal/schema/cassandra/temporal/versioned
+temporal-cassandra-tool --ep ${CASSANDRA_SEEDS} create -k temporal --rf 1
+temporal-cassandra-tool --ep ${CASSANDRA_SEEDS} -k temporal setup-schema -v 0.0
+temporal-cassandra-tool --ep ${CASSANDRA_SEEDS} -k temporal update-schema -d /etc/temporal/schema/cassandra/temporal/versioned
 
 # Setup Elasticsearch index
 # temporal-elasticsearch-tool is available in v1.30+ server releases
