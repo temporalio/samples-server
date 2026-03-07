@@ -40,33 +40,42 @@ The following example shows how to use the Go SDK to create a
 Temporal that can connect to this Temporal Cluster using TLS:
 
 ```go
+package main
+
 import (
-	"go.temporal.io/sdk/client"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"log"
 	"os"
+
+	workflowservice "go.temporal.io/api/workflowservice/v1"
+	"go.temporal.io/sdk/client"
 )
 
-
-func createClient() {
-	// load the server's certificate 
-	serverPEM, err := os.ReadFile("certs/cluster.pem")
+func main() {
+	// Load CA certificate to trust this cert chain
+	caPEM, err := os.ReadFile("certs/ca.cert")
 	if err != nil {
-		log.Fatalln("failed to load server certificate")
+		log.Fatalln("failed to load CA certificate")
+	}
+	rootPool := x509.NewCertPool()
+	if !rootPool.AppendCertsFromPEM(caPEM) {
+		log.Fatalln("invalid CA cert PEM")
 	}
 
-	// add it to a set of certificate authorities
-	serverCAPool := x509.NewCertPool()
-	if !serverCAPool.AppendCertsFromPEM(serverPEM) {
-		log.Fatalln("invalid server cert PEM")
+	// Load client certificate and key for mTLS
+	clientCert, err := tls.LoadX509KeyPair("certs/client.pem", "certs/client.key")
+	if err != nil {
+		log.Fatalln("failed to load client certificate/key:", err)
 	}
 
 	// configure the TLS connection
 	c, err := client.Dial(client.Options{
 		ConnectionOptions: client.ConnectionOptions{
 			TLS: &tls.Config{
-				RootCAs:      serverCAPool,
+				RootCAs:      rootPool,
+				Certificates: []tls.Certificate{clientCert},
 				ServerName:   "tls-sample",
 			},
 		},
@@ -77,5 +86,12 @@ func createClient() {
 	}
 	defer c.Close()
 
-	// Code that uses the Client would follow
+	// Lightweight connectivity test using GetSystemInfo on WorkflowService
+	ctx := context.Background()
+	info, err := c.WorkflowService().GetSystemInfo(ctx, &workflowservice.GetSystemInfoRequest{})
+	if err != nil {
+		log.Fatalln("failed to reach Temporal server:", err)
+	}
+	log.Printf("Connected to Temporal. Server version: %s", info.GetServerVersion())
+}
 ```
