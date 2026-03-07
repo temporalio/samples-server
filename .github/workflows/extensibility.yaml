@@ -26,7 +26,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.22'
-      - name: build
+          go-version-file: extensibility/go.mod
+      - name: build and test
         working-directory: extensibility
-        run: go build ./...
+        run: go test -count=1 -timeout 120s ./...
