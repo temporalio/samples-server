@@ -9,17 +9,19 @@ set -eu
 : "${ES_VERSION:?ERROR: ES_VERSION environment variable is required}"
 : "${ES_USER:?ERROR: ES_USER environment variable is required}"
 : "${ES_PWD:?ERROR: ES_PWD environment variable is required}"
+
+: "${POSTGRES_SEEDS:?ERROR: POSTGRES_SEEDS environment variable is required}"
 : "${POSTGRES_USER:?ERROR: POSTGRES_USER environment variable is required}"
 
 echo 'Starting PostgreSQL and Elasticsearch (TLS) schema setup...'
 echo 'Waiting for PostgreSQL port to be available...'
-nc -z -w 10 postgresql ${POSTGRES_DEFAULT_PORT:-5432}
+nc -z -w 10 ${POSTGRES_SEEDS} ${POSTGRES_DEFAULT_PORT:-5432}
 echo 'PostgreSQL port is available'
 
 # Create and setup temporal database with TLS
-temporal-sql-tool --plugin postgres12 --ep postgresql -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt create
-temporal-sql-tool --plugin postgres12 --ep postgresql -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt setup-schema -v 0.0
-temporal-sql-tool --plugin postgres12 --ep postgresql -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt update-schema -d /etc/temporal/schema/postgresql/v12/temporal/versioned
+temporal-sql-tool --plugin postgres12 --ep ${POSTGRES_SEEDS} -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt create
+temporal-sql-tool --plugin postgres12 --ep ${POSTGRES_SEEDS} -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt setup-schema -v 0.0
+temporal-sql-tool --plugin postgres12 --ep ${POSTGRES_SEEDS} -u ${POSTGRES_USER} -p ${POSTGRES_DEFAULT_PORT:-5432} --db temporal --tls --tls-ca-file /usr/local/share/ca-certificates/ca.crt update-schema -d /etc/temporal/schema/postgresql/v12/temporal/versioned
 
 # Setup Elasticsearch index with TLS
 # temporal-elasticsearch-tool is available in v1.30+ server releases

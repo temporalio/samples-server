@@ -1,0 +1,82 @@
+log:
+  stdout: true
+  level: error
+
+persistence:
+  defaultStore: sqlite-default
+  visibilityStore: sqlite-visibility
+  numHistoryShards: 1
+  datastores:
+    sqlite-default:
+      sql:
+        pluginName: "sqlite"
+        databaseName: "default"
+        connectAddr: "localhost"
+        connectProtocol: "tcp"
+        connectAttributes:
+          mode: "memory"
+          cache: "private"
+        maxConns: 1
+        maxIdleConns: 1
+        maxConnLifetime: "1h"
+    sqlite-visibility:
+      sql:
+        pluginName: "sqlite"
+        databaseName: "default"
+        connectAddr: "localhost"
+        connectProtocol: "tcp"
+        connectAttributes:
+          mode: "memory"
+          cache: "private"
+        maxConns: 1
+        maxIdleConns: 1
+        maxConnLifetime: "1h"
+
+global:
+  membership:
+    maxJoinDuration: 30s
+    broadcastAddress: "127.0.0.1"
+  metrics:
+    prometheus:
+      framework: "tally"
+      listenAddress: ":0"
+
+services:
+  frontend:
+    rpc:
+      grpcPort: 17233
+      membershipPort: 17234
+      bindOnLocalHost: true
+  matching:
+    rpc:
+      grpcPort: 17235
+      membershipPort: 17236
+      bindOnLocalHost: true
+  history:
+    rpc:
+      grpcPort: 17237
+      membershipPort: 17238
+      bindOnLocalHost: true
+  worker:
+    rpc:
+      grpcPort: 17239
+      membershipPort: 17240
+      bindOnLocalHost: true
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "active"
+  currentClusterName: "active"
+  clusterInformation:
+    active:
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "localhost:17233"
+
+dcRedirectionPolicy:
+  policy: "noop"
+
+publicClient:
+  hostPort: "localhost:17233"

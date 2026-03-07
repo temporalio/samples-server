@@ -34,22 +34,28 @@ import (
 	"github.com/temporalio/service-samples/authorizer"
 )
 
-func main() {
-
-	cfg, err := config.LoadConfig("development", "./config", "")
+func newServer(configFile string, opts ...temporal.ServerOption) (temporal.Server, error) {
+	cfg, err := config.Load(config.WithConfigFile(configFile))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	s, err := temporal.NewServer(
+	defaults := []temporal.ServerOption{
 		temporal.ForServices(temporal.DefaultServices),
 		temporal.WithConfig(cfg),
-		temporal.InterruptOn(temporal.InterruptCh()),
 		temporal.WithClaimMapper(func(cfg *config.Config) authorization.ClaimMapper {
 			return authorizer.NewMyClaimMapper(cfg)
 		}),
 		temporal.WithAuthorizer(authorizer.NewMyAuthorizer()),
-	)
+	}
+
+	return temporal.NewServer(append(defaults, opts...)...)
+}
+
+func main() {
+	// InterruptOn is passed here rather than in newServer so tests can call s.Stop() directly.
+	// Include this in production scenarios to enable graceful shutdown on SIGINT/SIGTERM.
+	s, err := newServer("./config/development.yaml", temporal.InterruptOn(temporal.InterruptCh()))
 	if err != nil {
 		log.Fatal(err)
 	}
