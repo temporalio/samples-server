@@ -1,0 +1,13 @@
+services:
+  temporal:
+    image: temporalio/temporal:latest
+    container_name: temporal
+    ports:
+      - 7233:7233
+      - 8233:8233
+    volumes:
+      - temporal-data:/data
+    command: server start-dev --ip 0.0.0.0 --db-filename /data/temporal.db
+
+volumes:
+  temporal-data:

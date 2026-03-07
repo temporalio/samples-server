@@ -1,0 +1,173 @@
+name: Test compose examples
+
+on:
+  pull_request:
+    paths:
+      - 'compose/**'
+      - '.github/workflows/compose.yaml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'compose/**'
+      - '.github/workflows/compose.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  lint-actions:
+    name: Lint GitHub Actions workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Lint actions
+        run: |
+          echo "::add-matcher::.github/actionlint-matcher.json"
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+        shell: bash
+
+  compose-test:
+    name: Test ${{ matrix.compose-file }}
+    needs: lint-actions
+    strategy:
+      fail-fast: false
+      matrix:
+        compose-file:
+          - docker-compose.yml
+          - docker-compose-postgres.yml
+          - docker-compose-mysql.yml
+          - docker-compose-mysql-es.yml
+          - docker-compose-cass-es.yml
+          - docker-compose-postgres-opensearch.yml
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Print build information
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          REF: ${{ github.ref }}
+          COMPOSE_FILE: ${{ matrix.compose-file }}
+        run: echo "head_ref=$HEAD_REF ref=$REF compose=$COMPOSE_FILE"
+
+      - uses: actions/checkout@v6
+
+      - name: Start compose stack
+        working-directory: compose
+        run: docker compose -f ${{ matrix.compose-file }} up -d
+
+      - name: Run validation
+        working-directory: compose
+        run: |
+          docker compose -f ${{ matrix.compose-file }} -f docker-compose-validate.yml up temporal-validate --exit-code-from temporal-validate
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: compose
+        run: |
+          echo "=== Printing all container logs ==="
+          docker compose -f ${{ matrix.compose-file }} ps -a
+          docker compose -f ${{ matrix.compose-file }} logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: compose
+        run: docker compose -f ${{ matrix.compose-file }} -f docker-compose-validate.yml down -v
+
+  compose-tls-test:
+    name: Test docker-compose-tls.yml
+    needs: lint-actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Print build information
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          REF: ${{ github.ref }}
+        run: echo "head_ref=$HEAD_REF ref=$REF compose=docker-compose-tls.yml"
+
+      - uses: actions/checkout@v6
+
+      - name: Generate TLS certificates
+        working-directory: compose
+        run: |
+          docker build -t temporal_tls:test -f tls/Dockerfile.tls .
+          mkdir -p .pki
+          docker run --rm -v temporal_tls_pki:/pki -v "${PWD}"/.pki:/pki-out temporal_tls:test
+
+      - name: Build TLS images
+        working-directory: compose
+        run: COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml build --no-cache
+
+      - name: Start TLS compose stack
+        working-directory: compose
+        run: COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml up -d
+
+      - name: Run validation
+        working-directory: compose
+        run: |
+          COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml -f docker-compose-validate.yml up temporal-validate --exit-code-from temporal-validate
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: compose
+        run: |
+          echo "=== Printing all container logs ==="
+          COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml ps -a
+          COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: compose
+        run: |
+          COMPOSE_PROJECT_NAME=tls_test docker compose -f docker-compose-tls.yml -f docker-compose-validate.yml down -v
+          docker volume rm temporal_tls_pki || true
+          rm -rf .pki
+
+  compose-multirole-test:
+    name: Test docker-compose-multirole.yaml
+    needs: lint-actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Print build information
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          REF: ${{ github.ref }}
+        run: echo "head_ref=$HEAD_REF ref=$REF compose=docker-compose-multirole.yaml"
+
+      - uses: actions/checkout@v6
+
+      - name: Install loki Docker plugin
+        run: docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
+
+      - name: Start multirole compose stack
+        working-directory: compose
+        run: docker compose -f docker-compose-multirole.yaml up -d
+
+      - name: Run validation
+        working-directory: compose
+        run: |
+          docker compose -f docker-compose-multirole.yaml -f docker-compose-validate-multirole.yml up temporal-validate --exit-code-from temporal-validate
+
+      - name: Verify temporal services are running
+        working-directory: compose
+        run: |
+          docker compose -f docker-compose-multirole.yaml ps temporal-history temporal-frontend temporal-matching temporal-worker
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: compose
+        run: |
+          echo "=== Printing all container logs ==="
+          docker compose -f docker-compose-multirole.yaml ps -a
+          docker compose -f docker-compose-multirole.yaml logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: compose
+        run: docker compose -f docker-compose-multirole.yaml -f docker-compose-validate-multirole.yml down -v
