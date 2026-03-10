@@ -78,6 +78,58 @@ jobs:
         working-directory: compose
         run: docker compose -f ${{ matrix.compose-file }} -f docker-compose-validate.yml down -v
 
+  compose-dev-test:
+    name: Test docker-compose-dev.yml
+    needs: lint-actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Start dev compose stack
+        working-directory: compose
+        run: docker compose -f docker-compose-dev.yml up -d
+
+      - name: Wait for Temporal to be ready
+        working-directory: compose
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose -f docker-compose-dev.yml exec temporal temporal operator cluster health 2>/dev/null; then
+              echo "Temporal is ready"
+              exit 0
+            fi
+            echo "Waiting for Temporal... ($i/30)"
+            sleep 2
+          done
+          echo "Temporal failed to become ready"
+          exit 1
+
+      - name: Validate Temporal is functional
+        working-directory: compose
+        run: |
+          docker compose -f docker-compose-dev.yml exec temporal temporal operator namespace describe default
+          docker compose -f docker-compose-dev.yml exec temporal temporal workflow start \
+            --workflow-id validation-test \
+            --type NonExistentWorkflow \
+            --task-queue validation-queue \
+            --execution-timeout 10s
+          docker compose -f docker-compose-dev.yml exec temporal temporal workflow terminate \
+            --workflow-id validation-test \
+            --reason "Validation complete" || true
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: compose
+        run: |
+          echo "=== Printing all container logs ==="
+          docker compose -f docker-compose-dev.yml ps -a
+          docker compose -f docker-compose-dev.yml logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: compose
+        run: docker compose -f docker-compose-dev.yml down -v
+
   compose-tls-test:
     name: Test docker-compose-tls.yml
     needs: lint-actions
