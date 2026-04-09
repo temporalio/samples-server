@@ -216,7 +216,9 @@ jobs:
           port_listening() {
             container=$1
             port=$2
-            docker exec "$container" ss -tln 2>/dev/null | grep -qE ":${port}[[:space:]]"
+            hex_port=$(printf '%04X' "$port")
+            docker exec "$container" cat /proc/net/tcp /proc/net/tcp6 2>/dev/null \
+              | awk '{print $2}' | grep -qi ":${hex_port}$"
           }
 
           check_expected_port() {
@@ -224,7 +226,7 @@ jobs:
             port=$2
             if ! port_listening "$container" "$port"; then
               echo "FAIL: $container is not listening on expected port $port"
-              docker exec "$container" ss -tln 2>/dev/null || true
+              docker exec "$container" cat /proc/net/tcp /proc/net/tcp6 2>/dev/null || true
               exit 1
             fi
             echo "OK: $container is listening on port $port"
