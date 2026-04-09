@@ -108,7 +108,7 @@ services:
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
-      - SERVICES=history
+      - TEMPORAL_SERVICES=history
       - PROMETHEUS_ENDPOINT=0.0.0.0:8000
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
@@ -141,7 +141,7 @@ services:
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
-      - SERVICES=matching
+      - TEMPORAL_SERVICES=matching
       - PROMETHEUS_ENDPOINT=0.0.0.0:8001
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
@@ -174,7 +174,7 @@ services:
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
-      - SERVICES=frontend
+      - TEMPORAL_SERVICES=frontend
       - FRONTEND_GRPC_PORT=7237
       - PROMETHEUS_ENDPOINT=0.0.0.0:8002
       - ENABLE_ES=true
@@ -208,7 +208,7 @@ services:
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
-      - SERVICES=frontend
+      - TEMPORAL_SERVICES=frontend
       # set different frontend grpc port
       - FRONTEND_GRPC_PORT=7236
       # set different membership port than temporal-frontend
@@ -245,7 +245,7 @@ services:
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
-      - SERVICES=worker
+      - TEMPORAL_SERVICES=worker
       - PROMETHEUS_ENDPOINT=0.0.0.0:8003
       # set to nginx
       - PUBLIC_FRONTEND_ADDRESS=temporal-nginx:7233

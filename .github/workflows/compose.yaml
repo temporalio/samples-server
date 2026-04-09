@@ -211,6 +211,63 @@ jobs:
         run: |
           docker compose -f docker-compose-multirole.yaml ps temporal-history temporal-frontend temporal-matching temporal-worker
 
+      - name: Verify each container runs only its expected service
+        run: |
+          port_listening() {
+            container=$1
+            port=$2
+            docker exec "$container" ss -tln 2>/dev/null | grep -qE ":${port}[[:space:]]"
+          }
+
+          check_expected_port() {
+            container=$1
+            port=$2
+            if ! port_listening "$container" "$port"; then
+              echo "FAIL: $container is not listening on expected port $port"
+              docker exec "$container" ss -tln 2>/dev/null || true
+              exit 1
+            fi
+            echo "OK: $container is listening on port $port"
+          }
+
+          check_no_port() {
+            container=$1
+            port=$2
+            if port_listening "$container" "$port"; then
+              echo "FAIL: $container is unexpectedly listening on port $port"
+              exit 1
+            fi
+            echo "OK: $container is not listening on port $port"
+          }
+
+          # history: port 7234 only
+          check_expected_port temporal-history 7234
+          check_no_port temporal-history 7235
+          check_no_port temporal-history 7237
+          check_no_port temporal-history 7236
+
+          # matching: port 7235 only
+          check_expected_port temporal-matching 7235
+          check_no_port temporal-matching 7234
+          check_no_port temporal-matching 7237
+          check_no_port temporal-matching 7236
+
+          # frontend: port 7237 (FRONTEND_GRPC_PORT=7237)
+          check_expected_port temporal-frontend 7237
+          check_no_port temporal-frontend 7234
+          check_no_port temporal-frontend 7235
+
+          # frontend2: port 7236 (FRONTEND_GRPC_PORT=7236)
+          check_expected_port temporal-frontend2 7236
+          check_no_port temporal-frontend2 7234
+          check_no_port temporal-frontend2 7235
+
+          # worker: should not bind any of the other service ports
+          check_no_port temporal-worker 7234
+          check_no_port temporal-worker 7235
+          check_no_port temporal-worker 7237
+          check_no_port temporal-worker 7236
+
       - name: Print all logs on failure
         if: failure()
         working-directory: compose
