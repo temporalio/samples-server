@@ -270,6 +270,39 @@ jobs:
           check_no_port temporal-worker 7237
           check_no_port temporal-worker 7236
 
+      - name: Verify ringpop membership ports are reachable on temporal-network
+        run: |
+          port_listening() {
+            container=$1
+            port=$2
+            hex_port=$(printf '%04X' "$port")
+            docker exec "$container" cat /proc/net/tcp /proc/net/tcp6 2>/dev/null \
+              | awk '{print $2}' | grep -qi ":${hex_port}$"
+          }
+
+          # Check membership ports are listening inside each container
+          for entry in "temporal-history:6934" "temporal-matching:6935"; do
+            container=${entry%:*}
+            port=${entry#*:}
+            if ! port_listening "$container" "$port"; then
+              echo "FAIL: $container is not listening on membership port $port"
+              docker exec "$container" cat /proc/net/tcp /proc/net/tcp6 2>/dev/null || true
+              exit 1
+            fi
+            echo "OK: $container is listening on membership port $port"
+          done
+
+          # Verify membership ports are reachable from within temporal-network
+          for entry in "temporal-history:6934" "temporal-matching:6935"; do
+            target=${entry%:*}
+            port=${entry#*:}
+            if ! docker exec temporal-admin-tools nc -zw3 "$target" "$port"; then
+              echo "FAIL: $target:$port is not reachable on temporal-network"
+              exit 1
+            fi
+            echo "OK: $target:$port is reachable on temporal-network"
+          done
+
       - name: Print all logs on failure
         if: failure()
         working-directory: compose
