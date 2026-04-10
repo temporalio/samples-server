@@ -12,7 +12,7 @@ services:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
       - ./config_template.yaml:/etc/temporal/config/config_template.yaml
     environment:
-      - "SERVICES=frontend:matching:history:worker:internal-frontend"
+      - "TEMPORAL_SERVICES=frontend:matching:history:worker:internal-frontend"
       - "CASSANDRA_SEEDS=cassandra"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
       - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
