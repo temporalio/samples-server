@@ -14,44 +14,20 @@ log:
 persistence:
     numHistoryShards: {{ default "4" (env "NUM_HISTORY_SHARDS") }}
     defaultStore: default
-    {{- $es := default "false" (env "ENABLE_ES") | lower -}}
-    {{- if eq $es "true" }}
     visibilityStore: es-visibility
-    {{- else }}
-    visibilityStore: visibility
-    {{- end }}
     datastores:
         default:
             cassandra:
                 hosts: "{{ default "" (env "CASSANDRA_SEEDS") }}"
                 keyspace: {{ default "temporal" (env "KEYSPACE") }}
-                user: {{ default "" (env "CASSANDRA_USER") }}
-                password: {{ default "" (env "CASSANDRA_PASSWORD") }}
                 port: {{ default "9042" (env "CASSANDRA_PORT") }}
-                tls:
-                    enabled: {{ default "false" (env "CASSANDRA_TLS_ENABLED") }}
-
-        visibility:
-            cassandra:
-                hosts: "{{ default "" (env "CASSANDRA_SEEDS") }}"
-                keyspace: {{ default "temporal_visibility" (env "VISIBILITY_KEYSPACE") }}
-                user: {{ default "" (env "CASSANDRA_USER") }}
-                password: {{ default "" (env "CASSANDRA_PASSWORD") }}
-                port: {{ default "9042" (env "CASSANDRA_PORT") }}
-                tls:
-                    enabled: {{ default "false" (env "CASSANDRA_TLS_ENABLED") }}
-
-        {{- if eq $es "true" }}
         es-visibility:
             elasticsearch:
                 url:
                     scheme: {{ default "http" (env "ES_SCHEME") }}
                     host: "{{ default "" (env "ES_SEEDS") }}:{{ default "9200" (env "ES_PORT") }}"
-                username: {{ default "" (env "ES_USER") }}
-                password: {{ default "" (env "ES_PWD") }}
                 indices:
                     visibility: {{ default "temporal_visibility_v1_dev" (env "ES_VIS_INDEX") }}
-        {{- end }}
 
 global:
     membership:
@@ -89,48 +65,27 @@ global:
                     requireClientAuth: true
                     clientCaFiles:
                         - /certs/client/ca/client-intermediate-ca-development.pem
-    {{- if env "STATSD_ENDPOINT" }}
-    metrics:
-        statsd:
-            hostPort: {{ env "STATSD_ENDPOINT" }}
-            prefix: "temporal"
-    {{- else if env "PROMETHEUS_ENDPOINT" }}
-    metrics:
-        prometheus:
-            timerType: {{ default "histogram" (env "PROMETHEUS_TIMER_TYPE") }}
-            listenAddress: {{ env "PROMETHEUS_ENDPOINT" }}
-    {{- end }}
 
-{{- $temporalGrpcPort := default "7233" (env "FRONTEND_GRPC_PORT") }}
 services:
     frontend:
         rpc:
-            grpcPort: {{ $temporalGrpcPort }}
-            membershipPort: {{ default "6933" (env "FRONTEND_MEMBERSHIP_PORT") }}
+            grpcPort: 7233
+            membershipPort: 6933
             bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
-
-    internal-frontend:
-        rpc:
-            grpcPort: {{ default "7236" (env "INTERNAL_FRONTEND_GRPC_PORT") }}
-            membershipPort: {{ default "6936" (env "INTERNAL_FRONTEND_MEMBERSHIP_PORT") }}
-            bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
-
     matching:
         rpc:
-            grpcPort: {{ default "7235" (env "MATCHING_GRPC_PORT") }}
-            membershipPort: {{ default "6935" (env "MATCHING_MEMBERSHIP_PORT") }}
+            grpcPort: 7235
+            membershipPort: 6935
             bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
-
     history:
         rpc:
-            grpcPort: {{ default "7234" (env "HISTORY_GRPC_PORT") }}
-            membershipPort: {{ default "6934" (env "HISTORY_MEMBERSHIP_PORT") }}
+            grpcPort: 7234
+            membershipPort: 6934
             bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
-
     worker:
         rpc:
-            grpcPort: {{ default "7239" (env "WORKER_GRPC_PORT") }}
-            membershipPort: {{ default "6939" (env "WORKER_MEMBERSHIP_PORT") }}
+            grpcPort: 7239
+            membershipPort: 6939
             bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
 
 clusterMetadata:
@@ -143,36 +98,7 @@ clusterMetadata:
             enabled: true
             initialFailoverVersion: 1
             rpcName: "frontend"
-            rpcAddress: {{ print "127.0.0.1:" $temporalGrpcPort }}
-
-dcRedirectionPolicy:
-    policy: "noop"
-    toDC: ""
-
-archival:
-  history:
-    state: "enabled"
-    enableRead: true
-    provider:
-      filestore:
-        fileMode: "0666"
-        dirMode: "0766"
-  visibility:
-    state: "enabled"
-    enableRead: true
-    provider:
-      filestore:
-        fileMode: "0666"
-        dirMode: "0766"
-
-namespaceDefaults:
-  archival:
-    history:
-      state: "disabled"
-      URI: "file:///tmp/temporal_archival/development"
-    visibility:
-      state: "disabled"
-      URI: "file:///tmp/temporal_vis_archival/development"
+            rpcAddress: "127.0.0.1:7233"
 
 dynamicConfigClient:
     filepath: {{ default "/etc/temporal/config/dynamicconfig" (env "DYNAMIC_CONFIG_FILE_PATH") }}
