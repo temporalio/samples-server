@@ -17,6 +17,9 @@ openssl x509 -req -in $CERTS_DIR/cluster.csr -CA $CERTS_DIR/ca.cert -CAkey $CERT
 # Generate a private key and a certificate for clients
 openssl req -newkey rsa:4096 -nodes -keyout "$CERTS_DIR/client.key" -out "$CERTS_DIR/client.csr" -config client-cert.conf
 openssl x509 -req -in $CERTS_DIR/client.csr -CA $CERTS_DIR/ca.cert -CAkey $CERTS_DIR/ca.key -CAcreateserial -out $CERTS_DIR/client.pem -days 365 -sha256 -extfile client-cert.conf -extensions req_ext
-# Export to .pfx 
+# Export to .pfx
 # "-keypbe NONE -certpbe NONE -passout pass:" specifies an unencrypted archive
 openssl pkcs12 -export -out $CERTS_DIR/client.pfx -inkey $CERTS_DIR/client.key -in $CERTS_DIR/client.pem -keypbe NONE -certpbe NONE -passout pass:
+
+# Make certs readable by the Temporal server container (runs as non-root)
+chmod -R a+r $CERTS_DIR
