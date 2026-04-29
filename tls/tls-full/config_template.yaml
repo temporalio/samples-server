@@ -1,4 +1,12 @@
 # enable-template
+#
+# This comment enables Go template rendering with sprig functions when loaded
+# via TEMPORAL_SERVER_CONFIG_FILE_PATH. Environment variables are accessed with
+# the sprig env function: {{ default "fallback" (env "VAR_NAME") }}
+#
+# To preview the rendered config, run:
+#   temporal-server --config-file /path/to/this/file render-config
+#
 log:
     stdout: true
     level: {{ default "info" (env "LOG_LEVEL") }}

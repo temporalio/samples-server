@@ -55,3 +55,14 @@ To actually enforce namespace access, you'll have to build the server with a cus
 You can look in [tlsClaimMapper.go](./tlsClaimMapper.go) for an example that will work with the certs in this sample,
 and in [the authorizer sample](../../extensibility/authorizer/) for more instructions on how to build a custom server.
 
+### Custom config template
+
+This sample uses a custom `config_template.yaml` to configure per-namespace TLS host overrides. The file is a Go template rendered by the Temporal server using [sprig](https://masterminds.github.io/sprig/) functions.
+
+To enable template rendering, the file must contain `# enable-template` in the first 1KB. It is loaded via the `TEMPORAL_SERVER_CONFIG_FILE_PATH` environment variable.
+
+To preview the rendered config inside the container:
+
+```bash
+docker compose exec temporal temporal-server --config-file /etc/temporal/config/config_template.yaml render-config
+```
