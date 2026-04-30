@@ -56,7 +56,6 @@ services:
     ports:
       - "7233:7233"
     volumes:
-      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
       - ./config_template.yaml:/etc/temporal/config/config_template.yaml
     depends_on:
@@ -66,7 +65,6 @@ services:
       - "TEMPORAL_SERVER_CONFIG_FILE_PATH=/etc/temporal/config/config_template.yaml"
       - "CASSANDRA_SEEDS=cassandra"
       - "ES_SEEDS=elasticsearch"
-      - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-cass.yaml"
       - "BIND_ON_IP=0.0.0.0"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "7233"]

@@ -1,8 +1,18 @@
 # enable-template
 #
-# This comment enables Go template rendering with sprig functions when loaded
-# via TEMPORAL_SERVER_CONFIG_FILE_PATH. Environment variables are accessed with
-# the sprig env function: {{ default "fallback" (env "VAR_NAME") }}
+# Custom server config for the tls-full sample. Based on the default
+# development-cass-es.yaml embedded in the server binary, with the following
+# changes:
+#
+#   - Uses # enable-template directive with sprig env() for environment variable
+#     substitution (the default config uses hardcoded values)
+#   - Adds global.tls block with internode mTLS and per-namespace frontend
+#     hostOverrides (the reason this custom config exists)
+#   - Uses bindOnIP instead of bindOnLocalHost so services are reachable
+#     across containers
+#   - Omits pprof, metrics, archival, dcRedirectionPolicy, and
+#     dynamicConfigClient (not relevant to this sample; the server uses
+#     a noop dynamic config client when none is configured)
 #
 # To preview the rendered config, run:
 #   temporal-server --config-file /path/to/this/file render-config
@@ -33,6 +43,10 @@ global:
     membership:
         maxJoinDuration: 30s
         broadcastAddress: {{ default "" (env "TEMPORAL_BROADCAST_ADDRESS") }}
+    # TLS config -- this is the only section not present in the default config.
+    # Internode mTLS secures cluster-internal traffic. Frontend hostOverrides
+    # map SNI hostnames to per-namespace cert/CA pairs, allowing each namespace
+    # to authenticate with its own client certificate.
     tls:
         internode:
             server:
@@ -65,13 +79,42 @@ global:
                     requireClientAuth: true
                     clientCaFiles:
                         - /certs/client/ca/client-intermediate-ca-development.pem
+        # The system worker must connect to frontend over TLS. There are two
+        # approaches:
+        #
+        # 1. systemWorker (used here) -- give the worker a client cert that
+        #    frontend trusts. Simpler, no extra service needed.
+        #
+        # 2. internal-frontend -- run a separate frontend that uses internode
+        #    TLS (no client auth required). To use this instead, remove
+        #    systemWorker, uncomment internal-frontend under services, and add
+        #    "internal-frontend" to TEMPORAL_SERVICES in docker-compose.yml.
+        #
+        # See the PublicClient comment for guidance on when to use each:
+        # https://github.com/temporalio/temporal/blob/8e6e905428f0ec5257402cb003ead5f4924cdc95/common/config/config.go#L548-L564
+        systemWorker:
+            certFile: /certs/cluster/internode/cluster-internode.pem
+            keyFile: /certs/cluster/internode/cluster-internode.key
+            client:
+                serverName: internode.cluster-x.contoso.com
+                rootCaFiles:
+                    - /certs/cluster/ca/server-intermediate-ca.pem
 
 services:
     frontend:
         rpc:
             grpcPort: 7233
             membershipPort: 6933
+            # bindOnIP instead of bindOnLocalHost so services bind to the
+            # container's network interface rather than loopback only.
             bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
+    # Alternative to systemWorker: uncomment to run a dedicated internal
+    # frontend that the system worker connects to via internode TLS.
+    # internal-frontend:
+    #     rpc:
+    #         grpcPort: 7236
+    #         membershipPort: 6936
+    #         bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
     matching:
         rpc:
             grpcPort: 7235
@@ -99,7 +142,3 @@ clusterMetadata:
             initialFailoverVersion: 1
             rpcName: "frontend"
             rpcAddress: "127.0.0.1:7233"
-
-dynamicConfigClient:
-    filepath: {{ default "/etc/temporal/config/dynamicconfig" (env "DYNAMIC_CONFIG_FILE_PATH") }}
-    pollInterval: "60s"
