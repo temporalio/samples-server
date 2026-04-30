@@ -77,3 +77,6 @@ echo Generate a private key and a certificate for development namespace client
 generate_cert client-development-namespace $CLIENT_DIR/development $CLIENT_DIR/ca/client-intermediate-ca-development req_ext
 
 rm -rf $TEMP_DIR
+
+# Make certs readable by the Temporal server container (runs as non-root)
+chmod -R a+r $CERTS_DIR

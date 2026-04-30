@@ -32,22 +32,22 @@ cluster-internode    |              |                         |                 
 ./generate-certs.sh
 ```
 
-2. Start Temporal with `start-temporal.sh`. This will bring up a Temporal cluster (via `docker-compose`) with the `certs` subdirectory mounted as a volume and Temporal configured to use the test certificates in it to secure network communications.
+2. Start Temporal with `start-temporal.sh`. This will bring up a Temporal cluster (via `docker compose`) with the `certs` subdirectory mounted as a volume and Temporal configured to use the test certificates in it to secure network communications.
 
 ```bash
 ./start-temporal.sh
 ```
 
-3. You can use docker to enter the cli containers and use `tctl` like this (in another terminal):
+3. You can use docker to enter the cli containers and use the `temporal` CLI like this (in another terminal):
 
 ```bash
-docker exec -it tls-full-temporal-cli-admin-1 bash
-docker exec -it tls-full-temporal-cli-development-1 bash
-docker exec -it tls-full-temporal-cli-accounting-1 bash
+docker compose exec temporal-cli-admin bash
+docker compose exec temporal-cli-development bash
+docker compose exec temporal-cli-accounting bash
 ```
 
 Environment variables are set up to provide the `development` and `accounting` containers with access to namespaces with the respective names.
-(You'll have to create them first with `tctl namespace register`.)
+The `default` namespace is created automatically on startup.
 
 4. But you might notice that all three containers actually have identical (full admin-level) permissions!
 That's because there's no ClaimMapper or Authorizer actually examining the client certs to determine permissions.
@@ -55,3 +55,14 @@ To actually enforce namespace access, you'll have to build the server with a cus
 You can look in [tlsClaimMapper.go](./tlsClaimMapper.go) for an example that will work with the certs in this sample,
 and in [the authorizer sample](../../extensibility/authorizer/) for more instructions on how to build a custom server.
 
+### Custom config template
+
+This sample uses a custom `config_template.yaml` to configure per-namespace TLS host overrides. The file is a Go template rendered by the Temporal server using [sprig](https://masterminds.github.io/sprig/) functions.
+
+To enable template rendering, the file must contain `# enable-template` in the first 1KB. It is loaded via the `TEMPORAL_SERVER_CONFIG_FILE_PATH` environment variable.
+
+To preview the rendered config inside the container:
+
+```bash
+docker compose exec temporal temporal-server --config-file /etc/temporal/config/config_template.yaml render-config
+```
