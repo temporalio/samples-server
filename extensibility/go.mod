@@ -4,7 +4,7 @@ go 1.25.8
 
 require (
 	go.temporal.io/api v1.62.2
-	go.temporal.io/server v1.30.3
+	go.temporal.io/server v1.30.4
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.10
 )
