@@ -3,6 +3,18 @@ services:
     image: cassandra:3.11
     ports:
       - "9042:9042"
+  elasticsearch:
+    image: elasticsearch:7.17.27
+    ports:
+      - "9200:9200"
+    environment:
+      - "cluster.routing.allocation.disk.threshold_enabled=true"
+      - "cluster.routing.allocation.disk.watermark.low=512mb"
+      - "cluster.routing.allocation.disk.watermark.high=256mb"
+      - "cluster.routing.allocation.disk.watermark.flood_stage=128mb"
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "xpack.security.enabled=false"
   temporal:
     image: temporalio/auto-setup:${SERVER_TAG:-latest}
     ports:
@@ -12,8 +24,12 @@ services:
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
       - ./config_template.yaml:/etc/temporal/config/config_template.yaml
     environment:
-      - "TEMPORAL_SERVICES=frontend:matching:history:worker:internal-frontend"
+      - "SERVICES=frontend:matching:history:worker:internal-frontend"
+      - "BIND_ON_IP=0.0.0.0"
       - "CASSANDRA_SEEDS=cassandra"
+      - "ENABLE_ES=true"
+      - "ES_SEEDS=elasticsearch"
+      - "ES_VIS_INDEX=temporal_visibility_v1_dev"
       - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
       - "TEMPORAL_CLI_ADDRESS=temporal:7233" # used by tctl. Will be deprecated
       - "TEMPORAL_CLI_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/cluster/ca/server-intermediate-ca.pem"
@@ -29,6 +45,7 @@ services:
       - "TEMPORAL_TLS_SERVER_NAME=internode.cluster-x.contoso.com"
     depends_on:
       - cassandra
+      - elasticsearch
   temporal-ui:
     image: temporalio/ui:${UI_TAG:-latest}
     ports:

@@ -38,7 +38,7 @@ cluster-internode    |              |                         |                 
 ./start-temporal.sh
 ```
 
-3. You can use docker to enter the cli containers and use `tctl` like this (in another terminal):
+3. You can use docker to enter the cli containers and use the `temporal` CLI like this (in another terminal):
 
 ```bash
 docker exec -it tls-full-temporal-cli-admin-1 bash
@@ -47,7 +47,7 @@ docker exec -it tls-full-temporal-cli-accounting-1 bash
 ```
 
 Environment variables are set up to provide the `development` and `accounting` containers with access to namespaces with the respective names.
-(You'll have to create them first with `tctl namespace register`.)
+(You'll have to create them first from the admin container with `temporal operator namespace create -n development` and `temporal operator namespace create -n accounting`.)
 
 4. But you might notice that all three containers actually have identical (full admin-level) permissions!
 That's because there's no ClaimMapper or Authorizer actually examining the client certs to determine permissions.
