@@ -33,8 +33,8 @@ import (
 )
 
 // tokenFileEnv names the env var that points at the file containing the
-// bearer token. The fileTokenProvider re-reads it on every outbound RPC, so
-// rotation just means overwriting the file.
+// bearer token. See the doc comment on tokenprovider.fileTokenProvider for
+// caching and rotation behavior.
 const tokenFileEnv = "TOKEN_FILE"
 
 func newServer(configFile string, opts ...temporal.ServerOption) (temporal.Server, error) {
