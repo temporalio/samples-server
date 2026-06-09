@@ -1,0 +1,97 @@
+log:
+  stdout: true
+  level: error
+
+persistence:
+  defaultStore: sqlite-default
+  visibilityStore: sqlite-visibility
+  numHistoryShards: 1
+  datastores:
+    sqlite-default:
+      sql:
+        pluginName: "sqlite"
+        databaseName: "default"
+        connectAddr: "localhost"
+        connectProtocol: "tcp"
+        connectAttributes:
+          mode: "memory"
+          cache: "private"
+        maxConns: 1
+        maxIdleConns: 1
+        maxConnLifetime: "1h"
+    sqlite-visibility:
+      sql:
+        pluginName: "sqlite"
+        databaseName: "default"
+        connectAddr: "localhost"
+        connectProtocol: "tcp"
+        connectAttributes:
+          mode: "memory"
+          cache: "private"
+        maxConns: 1
+        maxIdleConns: 1
+        maxConnLifetime: "1h"
+
+global:
+  membership:
+    maxJoinDuration: 30s
+    broadcastAddress: "127.0.0.1"
+  metrics:
+    prometheus:
+      framework: "tally"
+      listenAddress: ":0"
+  tls:
+    # WithTokenProvider boot validation requires at least one remoteClusters TLS
+    # entry: the credential layer refuses to attach a bearer token to a
+    # plaintext dial. This entry is never used in this single-cluster demo;
+    # cert files are loaded lazily on first dial to the peer named here.
+    remoteClusters:
+      placeholder-peer:
+        client:
+          serverName: placeholder-peer
+  authorization:
+    remoteClusterAuth:
+      # Boot fails if no TokenProvider is configured; outbound cross-cluster
+      # RPCs that get an empty token return Unauthenticated. Safe to enable
+      # here because WithTokenProvider is wired in server/main.go.
+      require: true
+
+services:
+  frontend:
+    rpc:
+      grpcPort: 18233
+      membershipPort: 18234
+      bindOnLocalHost: true
+  matching:
+    rpc:
+      grpcPort: 18235
+      membershipPort: 18236
+      bindOnLocalHost: true
+  history:
+    rpc:
+      grpcPort: 18237
+      membershipPort: 18238
+      bindOnLocalHost: true
+  worker:
+    rpc:
+      grpcPort: 18239
+      membershipPort: 18240
+      bindOnLocalHost: true
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "active"
+  currentClusterName: "active"
+  clusterInformation:
+    active:
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "localhost:18233"
+
+dcRedirectionPolicy:
+  policy: "noop"
+
+publicClient:
+  hostPort: "localhost:18233"
