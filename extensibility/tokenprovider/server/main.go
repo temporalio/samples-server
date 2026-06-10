@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -45,7 +46,7 @@ func newServer(configFile string, opts ...temporal.ServerOption) (temporal.Serve
 
 	tokenFile := os.Getenv(tokenFileEnv)
 	if tokenFile == "" {
-		log.Fatalf("%s must be set to the path of a bearer-token file", tokenFileEnv)
+		return nil, fmt.Errorf("%s must be set to the path of a bearer-token file", tokenFileEnv)
 	}
 
 	defaults := []temporal.ServerOption{
