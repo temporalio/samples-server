@@ -34,7 +34,7 @@ import (
 )
 
 // tokenFileEnv names the env var that points at the file containing the
-// bearer token. See the doc comment on tokenprovider.fileTokenProvider for
+// bearer token. See tokenprovider.NewFileTokenProvider for
 // caching and rotation behavior.
 const tokenFileEnv = "TOKEN_FILE"
 
