@@ -37,8 +37,10 @@ func NewMyClaimMapper(_ *config.Config) authorization.ClaimMapper {
 func (c myClaimMapper) GetClaims(authInfo *authorization.AuthInfo) (*authorization.Claims, error) {
 	claims := authorization.Claims{}
 
-	if authInfo.TLSConnection != nil {
-		// Add claims based on client's TLS certificate
+	if authInfo.TLSSubject != nil {
+		// Add claims based on client's TLS certificate. TLSSubject is only
+		// populated when the client presents a cert (mTLS); a plain server-TLS
+		// connection leaves it nil even when TLSConnection is set.
 		claims.Subject = authInfo.TLSSubject.CommonName
 	}
 	if authInfo.AuthToken != "" {
