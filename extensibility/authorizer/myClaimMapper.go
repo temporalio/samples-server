@@ -23,7 +23,6 @@
 package authorizer
 
 import (
-
 	"go.temporal.io/server/common/authorization"
 	"go.temporal.io/server/common/config"
 )
@@ -53,4 +52,3 @@ func (c myClaimMapper) GetClaims(authInfo *authorization.AuthInfo) (*authorizati
 
 	return &claims, nil
 }
-

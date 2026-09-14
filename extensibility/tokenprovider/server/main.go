@@ -64,7 +64,7 @@ func newServer(configFile string, opts ...temporal.ServerOption) (temporal.Serve
 func main() {
 	// InterruptOn is passed here rather than in newServer so tests can call s.Stop() directly.
 	// Include this in production scenarios to enable graceful shutdown on SIGINT/SIGTERM.
-	s, err := newServer("./config/development.yaml", temporal.InterruptOn(temporal.InterruptCh()))
+	s, err := newServer("./tokenprovider/config/development.yaml", temporal.InterruptOn(temporal.InterruptCh()))
 	if err != nil {
 		log.Fatal(err)
 	}

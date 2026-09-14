@@ -31,6 +31,8 @@ trip sits behind the source.
 
 ### Steps to run this sample
 
+Run these commands from the repository's `extensibility` directory.
+
 1. Start up the dependencies by running the `make start-dependencies` command from within the main Temporal repository as described in the [contribution guide](https://github.com/temporalio/temporal/blob/master/CONTRIBUTING.md#run-temporal-server-locally).
 
 2. Create the database schema by running `make install-schema-cass-es`.
@@ -44,8 +46,10 @@ trip sits behind the source.
 4. Start Temporal by running `go run tokenprovider/server/main.go`.
 
    The token attaches to outbound replication dials only; single-cluster traffic
-   on `localhost:7233` is unaffected. To see the wiring exercised, register a
-   second cluster as a peer and create a global namespace.
+   on `localhost:7233` is unaffected. This sample demonstrates the sender-side
+   wiring rather than provisioning a complete two-cluster environment. To
+   exercise the wiring, configure a second cluster with TLS, register it as a
+   peer, and create a global namespace.
 
 ### Configuration knobs
 
@@ -59,9 +63,14 @@ this sample):
 
 `global.tls.remoteClusters` (or `WithTLSConfigProvider`) must also be
 configured — the credential layer requires transport security and refuses to
-attach a bearer token to a plaintext dial. The test config under
-`server/testdata/config.yaml` has a stub entry that demonstrates the minimum
-required to satisfy boot validation.
+attach a bearer token to a plaintext dial. Following the repository's TLS
+examples, the development config includes an example peer named
+`internode.cluster-y.contoso.com` and uses the same value for `serverName`.
+Replace both values with the peer's hostname. With `forceTLS: true`, its
+certificate must chain to a CA trusted by the host; set `rootCaFiles` when using
+a private or self-signed certificate. See the repository's
+[full TLS sample](../../tls/tls-full/) for certificate generation and server-side
+TLS configuration.
 
 ### Token rotation behaviour
 

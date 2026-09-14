@@ -41,14 +41,13 @@ global:
       framework: "tally"
       listenAddress: ":0"
   tls:
-    # WithTokenProvider boot validation requires at least one remoteClusters TLS
-    # entry: the credential layer refuses to attach a bearer token to a
-    # plaintext dial. This entry is never used in this single-cluster demo;
-    # cert files are loaded lazily on first dial to the peer named here.
+    # Mirror the development config with a TLS-enabled example peer.
+    # This test never creates a remote-cluster dial, so it does not need a peer.
     remoteClusters:
-      placeholder-peer:
+      internode.cluster-y.contoso.com:
         client:
-          serverName: placeholder-peer
+          serverName: internode.cluster-y.contoso.com
+          forceTLS: true
   authorization:
     remoteClusterAuth:
       # Boot fails if no TokenProvider is configured; outbound cross-cluster

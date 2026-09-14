@@ -48,7 +48,7 @@ func TestFileTokenSource(t *testing.T) {
 		},
 		{
 			name:       "JWT propagates exp claim",
-			write:      "",   // populated per-case below
+			write:      "", // populated per-case below
 			wantExpiry: true,
 		},
 		{

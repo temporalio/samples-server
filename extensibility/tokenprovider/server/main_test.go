@@ -37,6 +37,27 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+func TestDevelopmentConfigEnablesRemoteClusterAuth(t *testing.T) {
+	cfg, err := config.Load(config.WithConfigFile("../config/development.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !cfg.Global.Authorization.RemoteClusterAuth.Require {
+		t.Fatal("development config must require remote-cluster authentication")
+	}
+	remoteTLS, ok := cfg.Global.TLS.RemoteClusters["internode.cluster-y.contoso.com"]
+	if !ok {
+		t.Fatal("development config must provide TLS for the example remote cluster")
+	}
+	if !remoteTLS.IsClientEnabled() {
+		t.Fatal("development config must enable TLS for remote-cluster clients")
+	}
+	if remoteTLS.Client.ServerName != "internode.cluster-y.contoso.com" {
+		t.Fatalf("remote-cluster TLS server name = %q, want %q", remoteTLS.Client.ServerName, "internode.cluster-y.contoso.com")
+	}
+}
+
 // TestServerBootsWithTokenProvider exercises the WithTokenProvider wiring:
 // the server's boot validation rejects the combination (require=true,
 // no TokenProvider), so a clean boot here confirms the provider made it into
