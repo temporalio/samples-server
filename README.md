@@ -19,6 +19,7 @@ Please follow instructions from README.md file in every sample directory.
 - **[Docker Compose](./compose/)**: docker-compose files to run a local Temporal Server with various database and dependency configurations (PostgreSQL, MySQL, Cassandra, Elasticsearch, OpenSearch).
 - **[TLS](./tls/)**: how to configure Transport Layer Security (TLS) to secure network communication with and within Temporal cluster.
 - **[Authorizer](./extensibility/authorizer)**: how to inject a low-level authorizer component that can control access to all API calls.
+- **[Token Provider](./extensibility/tokenprovider)**: how to attach a bearer token to outbound cross-cluster replication RPCs.
 
 ## Contributing
 

@@ -1,0 +1,134 @@
+log:
+  stdout: true
+  level: info
+
+persistence:
+  defaultStore: cass-default
+  visibilityStore: es-visibility
+  numHistoryShards: 4
+  datastores:
+    cass-default:
+      cassandra:
+        hosts: "127.0.0.1"
+        keyspace: "temporal"
+    es-visibility:
+      elasticsearch:
+        version: "v7"
+        logLevel: "error"
+        url:
+          scheme: "http"
+          host: "127.0.0.1:9200"
+        indices:
+          visibility: temporal_visibility_v1_dev
+          # secondary_visibility: temporal_visibility_v1_secondary
+        closeIdleConnectionsInterval: 15s
+global:
+  membership:
+    maxJoinDuration: 30s
+    broadcastAddress: "127.0.0.1"
+  pprof:
+    port: 7936
+  tls:
+    remoteClusters:
+      internode.cluster-y.contoso.com:
+        client:
+          # Match the peer hostname and certificate name. This sample relies on
+          # the host's root CAs; set rootCaFiles for private certificates.
+          serverName: internode.cluster-y.contoso.com
+          forceTLS: true
+  authorization:
+    remoteClusterAuth:
+      # Fail boot if the TokenProvider is not wired and fail outbound RPCs
+      # when it cannot supply a token.
+      require: true
+
+services:
+  frontend:
+    rpc:
+      grpcPort: 7233
+      membershipPort: 6933
+      bindOnLocalHost: true
+    metrics:
+      statsd:
+        hostPort: "127.0.0.1:8125"
+        prefix: "temporal"
+
+  matching:
+    rpc:
+      grpcPort: 7235
+      membershipPort: 6935
+      bindOnLocalHost: true
+    metrics:
+      statsd:
+        hostPort: "127.0.0.1:8125"
+        prefix: "temporal"
+
+  history:
+    rpc:
+      grpcPort: 7234
+      membershipPort: 6934
+      bindOnLocalHost: true
+    metrics:
+      statsd:
+        hostPort: "127.0.0.1:8125"
+        prefix: "temporal"
+
+  worker:
+    rpc:
+      grpcPort: 7239
+      membershipPort: 6939
+      bindOnLocalHost: true
+    metrics:
+      statsd:
+        hostPort: "127.0.0.1:8125"
+        prefix: "temporal"
+
+clusterMetadata:
+  enableGlobalNamespace: false
+  failoverVersionIncrement: 10
+  masterClusterName: "active"
+  currentClusterName: "active"
+  clusterInformation:
+    active:
+      enabled: true
+      initialFailoverVersion: 1
+      rpcName: "frontend"
+      rpcAddress: "localhost:7233"
+
+dcRedirectionPolicy:
+  policy: "noop"
+  toDC: ""
+
+archival:
+  history:
+    state: "enabled"
+    enableRead: true
+    provider:
+      filestore:
+        fileMode: "0666"
+        dirMode: "0766"
+      gstorage:
+        credentialsPath: "/tmp/gcloud/keyfile.json"
+  visibility:
+    state: "enabled"
+    enableRead: true
+    provider:
+      filestore:
+        fileMode: "0666"
+        dirMode: "0766"
+
+namespaceDefaults:
+  archival:
+    history:
+      state: "disabled"
+      URI: "file:///tmp/temporal_archival/development"
+    visibility:
+      state: "disabled"
+      URI: "file:///tmp/temporal_vis_archival/development"
+
+publicClient:
+  hostPort: "localhost:7233"
+
+dynamicConfigClient:
+  filepath: "./config/dynamicconfig/development.yaml"
+  pollInterval: "10s"
