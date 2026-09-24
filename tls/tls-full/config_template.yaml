@@ -1,123 +1,52 @@
+# enable-template
+#
+# Custom server config for the tls-full sample. Based on the default
+# development-cass-es.yaml embedded in the server binary, with the following
+# changes:
+#
+#   - Uses # enable-template directive with sprig env() for environment variable
+#     substitution (the default config uses hardcoded values)
+#   - Adds global.tls block with internode mTLS and per-namespace frontend
+#     hostOverrides (the reason this custom config exists)
+#   - Uses bindOnIP instead of bindOnLocalHost so services are reachable
+#     across containers
+#   - Omits pprof, metrics, archival, dcRedirectionPolicy, and
+#     dynamicConfigClient (not relevant to this sample; the server uses
+#     a noop dynamic config client when none is configured)
+#
+# To preview the rendered config, run:
+#   temporal-server --config-file /path/to/this/file render-config
+#
 log:
     stdout: true
-    level: {{ default .Env.LOG_LEVEL "info" }}
+    level: {{ default "info" (env "LOG_LEVEL") }}
 
 persistence:
-    numHistoryShards: {{ default .Env.NUM_HISTORY_SHARDS "4" }}
+    numHistoryShards: {{ default "4" (env "NUM_HISTORY_SHARDS") }}
     defaultStore: default
-    {{- $es := default .Env.ENABLE_ES "false" | lower -}}
-    {{- if eq $es "true" }}
     visibilityStore: es-visibility
-    {{- else }}
-    visibilityStore: visibility
-    {{- end }}
     datastores:
-        {{- $db := default .Env.DB "cassandra" | lower -}}
-        {{- if eq $db "cassandra" }}
         default:
             cassandra:
-                hosts: {{ default .Env.CASSANDRA_SEEDS "" }}
-                keyspace: {{ default .Env.KEYSPACE "temporal" }}
-                user: {{ default .Env.CASSANDRA_USER "" }}
-                password: {{ default .Env.CASSANDRA_PASSWORD "" }}
-                port: {{ default .Env.CASSANDRA_PORT "9042" }}
-                tls:
-                    enabled: {{ default .Env.CASSANDRA_TLS_ENABLED "false" }}
-                    caFile: {{ default .Env.CASSANDRA_CA ""}}
-                    certFile: {{ default .Env.CASSANDRA_CERT "" }}
-                    keyFile: {{ default .Env.CASSANDRA_CERT_KEY "" }}
-                    caData: {{ default .Env.CASSANDRA_CA_DATA "" }}
-                    certData: {{ default .Env.CASSANDRA_CERT_DATA "" }}
-                    keyData: {{ default .Env.CASSANDRA_CERT_KEY_DATA "" }}
-                    enableHostVerification: {{ default .Env.CASSANDRA_HOST_VERIFICATION "false"}}
-
-        visibility:
-            cassandra:
-                hosts: {{ default .Env.CASSANDRA_SEEDS "" }}
-                keyspace: {{ default .Env.VISIBILITY_KEYSPACE "temporal_visibility" }}
-                user: {{ default .Env.CASSANDRA_USER "" }}
-                password: {{ default .Env.CASSANDRA_PASSWORD "" }}
-                port: {{ default .Env.CASSANDRA_PORT "9042" }}
-                tls:
-                    enabled: {{ default .Env.CASSANDRA_TLS_ENABLED "false" }}
-                    caFile: {{ default .Env.CASSANDRA_CA ""}}
-                    certFile: {{ default .Env.CASSANDRA_CERT "" }}
-                    keyFile: {{ default .Env.CASSANDRA_CERT_KEY "" }}
-                    caData: {{ default .Env.CASSANDRA_CA_DATA "" }}
-                    certData: {{ default .Env.CASSANDRA_CERT_DATA "" }}
-                    keyData: {{ default .Env.CASSANDRA_CERT_KEY_DATA "" }}
-                    enableHostVerification: {{ default .Env.CASSANDRA_HOST_VERIFICATION "false"}}
-        {{- else if eq $db "mysql" }}
-        default:
-            sql:
-                pluginName: "mysql"
-                databaseName: {{ default .Env.DBNAME "temporal" }}
-                connectAddr: "{{ default .Env.MYSQL_SEEDS "" }}:{{ default .Env.DB_PORT "3306" }}"
-                connectProtocol: "tcp"
-                user: {{ default .Env.MYSQL_USER "" }}
-                password: {{ default .Env.MYSQL_PWD "" }}
-                {{- if .Env.MYSQL_TX_ISOLATION_COMPAT }}
-                connectAttributes:
-                    tx_isolation: 'READ-COMMITTED'
-                {{- end }}
-                maxConns: {{ default .Env.SQL_MAX_CONNS "20" }}
-                maxIdleConns: {{ default .Env.SQL_MAX_IDLE_CONNS "20" }}
-                maxConnLifetime: {{ default .Env.SQL_MAX_CONN_TIME "1h" }}
-        visibility:
-            sql:
-                pluginName: "mysql"
-                databaseName: {{ default .Env.VISIBILITY_DBNAME "temporal_visibility" }}
-                connectAddr: "{{ default .Env.MYSQL_SEEDS "" }}:{{ default .Env.DB_PORT "3306" }}"
-                connectProtocol: "tcp"
-                user: {{ default .Env.MYSQL_USER "" }}
-                password: {{ default .Env.MYSQL_PWD "" }}
-                {{- if .Env.MYSQL_TX_ISOLATION_COMPAT }}
-                connectAttributes:
-                    tx_isolation: 'READ-COMMITTED'
-                {{- end }}
-                maxConns: {{ default .Env.SQL_VIS_MAX_CONNS "20" }}
-                maxIdleConns: {{ default .Env.SQL_VIS_MAX_IDLE_CONNS "20" }}
-                maxConnLifetime: {{ default .Env.SQL_VIS_MAX_CONN_TIME "1h" }}
-        {{- else if eq $db "postgresql" }}
-        default:
-            sql:
-                pluginName: "postgres"
-                databaseName: {{ default .Env.DBNAME "temporal" }}
-                connectAddr: "{{ default .Env.POSTGRES_SEEDS "" }}:{{ default .Env.DB_PORT "5432" }}"
-                connectProtocol: "tcp"
-                user: {{ default .Env.POSTGRES_USER "" }}
-                password: {{ default .Env.POSTGRES_PWD "" }}
-                maxConns: {{ default .Env.SQL_MAX_CONNS "20" }}
-                maxIdleConns: {{ default .Env.SQL_MAX_IDLE_CONNS "20" }}
-                maxConnLifetime: {{ default .Env.SQL_MAX_CONN_TIME "1h" }}
-        visibility:
-            sql:
-                pluginName: "postgres"
-                databaseName: {{ default .Env.VISIBILITY_DBNAME "temporal_visibility" }}
-                connectAddr: "{{ default .Env.POSTGRES_SEEDS "" }}:{{ default .Env.DB_PORT "5432" }}"
-                connectProtocol: "tcp"
-                user: {{ default .Env.POSTGRES_USER "" }}
-                password: {{ default .Env.POSTGRES_PWD "" }}
-                maxConns: {{ default .Env.SQL_VIS_MAX_CONNS "20" }}
-                maxIdleConns: {{ default .Env.SQL_VIS_MAX_IDLE_CONNS "20" }}
-                maxConnLifetime: {{ default .Env.SQL_VIS_MAX_CONN_TIME "1h" }}
-        {{- end }}
-        {{- if eq $es "true" }}
+                hosts: "{{ default "" (env "CASSANDRA_SEEDS") }}"
+                keyspace: {{ default "temporal" (env "KEYSPACE") }}
+                port: {{ default "9042" (env "CASSANDRA_PORT") }}
         es-visibility:
             elasticsearch:
                 url:
-                    scheme: {{ default .Env.ES_SCHEME "http" }}
-                    host: "{{ default .Env.ES_SEEDS "" }}:{{ default .Env.ES_PORT "9200" }}"
-                username: {{ default .Env.ES_USER "" }}
-                password: {{ default .Env.ES_PWD "" }}
+                    scheme: {{ default "http" (env "ES_SCHEME") }}
+                    host: "{{ default "" (env "ES_SEEDS") }}:{{ default "9200" (env "ES_PORT") }}"
                 indices:
-                    visibility: {{ default .Env.ES_VIS_INDEX "temporal-visibility-dev" }} 
-        {{- end }}
+                    visibility: {{ default "temporal_visibility_v1_dev" (env "ES_VIS_INDEX") }}
 
 global:
     membership:
         maxJoinDuration: 30s
-        broadcastAddress: {{ default .Env.TEMPORAL_BROADCAST_ADDRESS "" }}
+        broadcastAddress: {{ default "" (env "TEMPORAL_BROADCAST_ADDRESS") }}
+    # TLS config -- this is the only section not present in the default config.
+    # Internode mTLS secures cluster-internal traffic. Frontend hostOverrides
+    # map SNI hostnames to per-namespace cert/CA pairs, allowing each namespace
+    # to authenticate with its own client certificate.
     tls:
         internode:
             server:
@@ -150,49 +79,57 @@ global:
                     requireClientAuth: true
                     clientCaFiles:
                         - /certs/client/ca/client-intermediate-ca-development.pem
-    {{- if .Env.STATSD_ENDPOINT }}
-    metrics:
-        statsd:
-            hostPort: {{ .Env.STATSD_ENDPOINT }}
-            prefix: "temporal"
-    {{- else if .Env.PROMETHEUS_ENDPOINT }}
-    metrics:
-        prometheus:
-            timerType: {{ default .Env.PROMETHEUS_TIMER_TYPE "histogram" }}
-            listenAddress: {{ .Env.PROMETHEUS_ENDPOINT }}
-    {{- end }}
+        # The system worker must connect to frontend over TLS. There are two
+        # approaches:
+        #
+        # 1. systemWorker (used here) -- give the worker a client cert that
+        #    frontend trusts. Simpler, no extra service needed.
+        #
+        # 2. internal-frontend -- run a separate frontend that uses internode
+        #    TLS (no client auth required). To use this instead, remove
+        #    systemWorker, uncomment internal-frontend under services, and add
+        #    "internal-frontend" to TEMPORAL_SERVICES in docker-compose.yml.
+        #
+        # See the PublicClient comment for guidance on when to use each:
+        # https://github.com/temporalio/temporal/blob/8e6e905428f0ec5257402cb003ead5f4924cdc95/common/config/config.go#L548-L564
+        systemWorker:
+            certFile: /certs/cluster/internode/cluster-internode.pem
+            keyFile: /certs/cluster/internode/cluster-internode.key
+            client:
+                serverName: internode.cluster-x.contoso.com
+                rootCaFiles:
+                    - /certs/cluster/ca/server-intermediate-ca.pem
 
-{{- $temporalGrpcPort := default .Env.FRONTEND_GRPC_PORT "7233" }}
 services:
     frontend:
         rpc:
-            grpcPort: {{ $temporalGrpcPort }}
-            membershipPort: {{ default .Env.FRONTEND_MEMBERSHIP_PORT "6933" }}
-            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
-
-    internal-frontend:
-        rpc:
-            grpcPort: {{ default .Env.INTERNAL_FRONTEND_GRPC_PORT "7236" }}
-            membershipPort: {{ default .Env.INTERNAL_FRONTEND_MEMBERSHIP_PORT "6936" }}
-            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
-
+            grpcPort: 7233
+            membershipPort: 6933
+            # bindOnIP instead of bindOnLocalHost so services bind to the
+            # container's network interface rather than loopback only.
+            bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
+    # Alternative to systemWorker: uncomment to run a dedicated internal
+    # frontend that the system worker connects to via internode TLS.
+    # internal-frontend:
+    #     rpc:
+    #         grpcPort: 7236
+    #         membershipPort: 6936
+    #         bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
     matching:
         rpc:
-            grpcPort: {{ default .Env.MATCHING_GRPC_PORT "7235" }}
-            membershipPort: {{ default .Env.MATCHING_MEMBERSHIP_PORT "6935" }}
-            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
-
+            grpcPort: 7235
+            membershipPort: 6935
+            bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
     history:
         rpc:
-            grpcPort: {{ default .Env.HISTORY_GRPC_PORT "7234" }}
-            membershipPort: {{ default .Env.HISTORY_MEMBERSHIP_PORT "6934" }}
-            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
-
+            grpcPort: 7234
+            membershipPort: 6934
+            bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
     worker:
         rpc:
-            grpcPort: {{ default .Env.WORKER_GRPC_PORT "7239" }}
-            membershipPort: {{ default .Env.WORKER_MEMBERSHIP_PORT "6939" }}
-            bindOnIP: {{ default .Env.BIND_ON_IP "127.0.0.1" }}
+            grpcPort: 7239
+            membershipPort: 6939
+            bindOnIP: {{ default "127.0.0.1" (env "BIND_ON_IP") }}
 
 clusterMetadata:
     enableGlobalNamespace: false
@@ -204,54 +141,4 @@ clusterMetadata:
             enabled: true
             initialFailoverVersion: 1
             rpcName: "frontend"
-            rpcAddress: {{ (print "127.0.0.1:" $temporalGrpcPort) }}
-
-dcRedirectionPolicy:
-    policy: "noop"
-    toDC: ""
-
-archival:
-  history:
-    state: "enabled"
-    enableRead: true
-    provider:
-      filestore:
-        fileMode: "0666"
-        dirMode: "0766"
-  visibility:
-    state: "enabled"
-    enableRead: true
-    provider:
-      filestore:
-        fileMode: "0666"
-        dirMode: "0766"
-
-namespaceDefaults:
-  archival:
-    history:
-      state: "disabled"
-      URI: "file:///tmp/temporal_archival/development"
-    visibility:
-      state: "disabled"
-      URI: "file:///tmp/temporal_vis_archival/development"
-
-kafka:
-    tls:
-        enabled: false
-    clusters:
-        test:
-            brokers:
-                - {{ default .Env.KAFKA_SEEDS "" }}:9092
-    topics:
-        temporal-visibility-dev:
-            cluster: test
-        temporal-visibility-dev-dlq:
-            cluster: test
-    applications:
-        visibility:
-            topic: temporal-visibility-dev
-            dlq-topic: temporal-visibility-dev-dlq
-
-dynamicConfigClient:
-    filepath: {{ default .Env.DYNAMIC_CONFIG_FILE_PATH "/etc/temporal/config/dynamicconfig" }}
-    pollInterval: "60s"
+            rpcAddress: "127.0.0.1:7233"

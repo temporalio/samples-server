@@ -1,15 +1,13 @@
-name: Test compose examples
+name: Test compose and TLS examples
 
 on:
   pull_request:
-    paths:
-      - 'compose/**'
-      - '.github/workflows/compose.yaml'
   push:
     branches:
       - main
     paths:
       - 'compose/**'
+      - 'tls/**'
       - '.github/workflows/compose.yaml'
 
 permissions:
@@ -315,3 +313,111 @@ jobs:
         if: always()
         working-directory: compose
         run: docker compose -f docker-compose-multirole.yaml -f docker-compose-validate-multirole.yml down -v
+
+  tls-simple-test:
+    name: Test tls-simple
+    needs: lint-actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TEMPORAL_TLS_CERTS_DIR: /etc/temporal/config/certs
+      TEMPORAL_LOCAL_CERT_DIR: ./certs
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate TLS certificates
+        working-directory: tls/tls-simple
+        run: bash generate-test-certs.sh
+
+      - name: Start compose stack
+        working-directory: tls/tls-simple
+        run: docker compose up -d
+
+      - name: Wait for namespace creation
+        working-directory: tls/tls-simple
+        run: |
+          for i in $(seq 1 60); do
+            if docker compose logs temporal-create-namespace 2>&1 | grep -q "Namespace 'default' created\|already exists"; then
+              echo "Namespace ready"
+              exit 0
+            fi
+            echo "Waiting for namespace creation... ($i/60)"
+            sleep 5
+          done
+          echo "Namespace creation did not complete"
+          exit 1
+
+      - name: Validate Temporal is functional
+        working-directory: tls/tls-simple
+        run: |
+          docker compose exec temporal-admin-tools temporal operator cluster health
+          docker compose exec temporal-admin-tools temporal operator namespace describe -n default
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: tls/tls-simple
+        run: |
+          echo "=== Printing all container logs ==="
+          docker compose ps -a
+          docker compose logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: tls/tls-simple
+        run: |
+          docker compose down -v
+          rm -rf certs
+
+  tls-full-test:
+    name: Test tls-full
+    needs: lint-actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TEMPORAL_TLS_CERTS_DIR: /certs
+      TEMPORAL_LOCAL_CERT_DIR: ./certs
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate TLS certificates
+        working-directory: tls/tls-full
+        run: bash generate-certs.sh
+
+      - name: Start compose stack
+        working-directory: tls/tls-full
+        run: docker compose up -d
+
+      - name: Wait for namespace creation
+        working-directory: tls/tls-full
+        run: |
+          for i in $(seq 1 60); do
+            if docker compose logs temporal-create-namespace 2>&1 | grep -q "Namespace 'default' created\|already exists"; then
+              echo "Namespace ready"
+              exit 0
+            fi
+            echo "Waiting for namespace creation... ($i/60)"
+            sleep 5
+          done
+          echo "Namespace creation did not complete"
+          exit 1
+
+      - name: Validate Temporal is functional
+        working-directory: tls/tls-full
+        run: |
+          docker compose exec temporal-cli-admin temporal operator cluster health
+          docker compose exec temporal-cli-admin temporal operator namespace describe -n default
+
+      - name: Print all logs on failure
+        if: failure()
+        working-directory: tls/tls-full
+        run: |
+          echo "=== Printing all container logs ==="
+          docker compose ps -a
+          docker compose logs
+
+      - name: Cleanup
+        if: always()
+        working-directory: tls/tls-full
+        run: |
+          docker compose down -v
+          rm -rf certs
