@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Lint actions
         run: |
@@ -54,7 +54,7 @@ jobs:
           COMPOSE_FILE: ${{ matrix.compose-file }}
         run: echo "head_ref=$HEAD_REF ref=$REF compose=$COMPOSE_FILE"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Start compose stack
         working-directory: compose
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Start dev compose stack
         working-directory: compose
@@ -142,7 +142,7 @@ jobs:
           REF: ${{ github.ref }}
         run: echo "head_ref=$HEAD_REF ref=$REF compose=docker-compose-tls.yml"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Generate TLS certificates
         working-directory: compose
@@ -192,7 +192,7 @@ jobs:
           REF: ${{ github.ref }}
         run: echo "head_ref=$HEAD_REF ref=$REF compose=docker-compose-multirole.yaml"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Install loki Docker plugin
         run: docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
