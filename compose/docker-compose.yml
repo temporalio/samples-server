@@ -34,7 +34,7 @@ services:
     networks:
       - temporal-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s || exit 1"]
+      test: ["CMD-SHELL", "curl -f 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 60
