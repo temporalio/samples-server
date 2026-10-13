@@ -9,4 +9,4 @@ export TEMPORAL_TLS_CERTS_DIR=/certs
 # as a volume at TEMPORAL_TLS_CERTS_DIR within the container
 export TEMPORAL_LOCAL_CERT_DIR=./certs
 
-docker-compose up
+docker compose up

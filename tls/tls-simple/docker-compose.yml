@@ -1,32 +1,73 @@
 services:
   cassandra:
-    image: cassandra:3.11
+    image: cassandra:${CASSANDRA_VERSION:-3.11.9}
     ports:
       - "9042:9042"
+    environment:
+      CASSANDRA_LISTEN_ADDRESS: 127.0.0.1
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
   elasticsearch:
-    image: elasticsearch:7.10.1
+    image: elasticsearch:${ELASTICSEARCH_VERSION:-7.17.27}
     ports:
       - "9200:9200"
     environment:
-      - "cluster.routing.allocation.disk.threshold_enabled=true"
-      - "cluster.routing.allocation.disk.watermark.low=512mb"
-      - "cluster.routing.allocation.disk.watermark.high=256mb"
-      - "cluster.routing.allocation.disk.watermark.flood_stage=128mb"
-      - "discovery.type=single-node"
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
-      - "xpack.security.enabled=false"
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+  temporal-admin-tools-setup:
+    image: temporalio/admin-tools:${SERVER_TAG:-latest}
+    restart: on-failure:6
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - CASSANDRA_SEEDS=cassandra
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - ES_SCHEME=http
+      - ES_VERSION=v7
+      - ES_VISIBILITY_INDEX=temporal_visibility_v1_dev
+    volumes:
+      - ../../compose/scripts:/scripts
+    entrypoint: ["/bin/sh"]
+    command: /scripts/setup-cassandra-es.sh
+
   temporal:
-    image: temporalio/auto-setup:${SERVER_TAG:-latest}
+    image: temporalio/server:${SERVER_TAG:-latest}
     ports:
       - "7233:7233"
     volumes:
       - ${DYNAMIC_CONFIG_DIR:-../config/dynamicconfig}:/etc/temporal/config/dynamicconfig
       - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+    depends_on:
+      temporal-admin-tools-setup:
+        condition: service_completed_successfully
     environment:
-      - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
       - "CASSANDRA_SEEDS=cassandra"
+      - "DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml"
       - "ENABLE_ES=true"
       - "ES_SEEDS=elasticsearch"
+      - "ES_VERSION=v7"
+      - "BIND_ON_IP=0.0.0.0"
       - "SKIP_DEFAULT_NAMESPACE_CREATION=true"
       - "SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true"
       - "TEMPORAL_TLS_SERVER_CA_CERT=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
@@ -41,15 +82,33 @@ services:
       - "TEMPORAL_TLS_FRONTEND_DISABLE_HOST_VERIFICATION=false"
       - "TEMPORAL_TLS_INTERNODE_SERVER_NAME=tls-sample"
       - "TEMPORAL_TLS_INTERNODE_DISABLE_HOST_VERIFICATION=false"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "7233"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 60
+
+  temporal-create-namespace:
+    image: temporalio/admin-tools:${SERVER_TAG:-latest}
+    restart: on-failure:5
+    depends_on:
+      temporal:
+        condition: service_healthy
+    environment:
       - "TEMPORAL_ADDRESS=temporal:7233"
       - "TEMPORAL_TLS_CA=${TEMPORAL_TLS_CERTS_DIR}/ca.cert"
       - "TEMPORAL_TLS_CERT=${TEMPORAL_TLS_CERTS_DIR}/cluster.pem"
       - "TEMPORAL_TLS_KEY=${TEMPORAL_TLS_CERTS_DIR}/cluster.key"
       - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
-    depends_on:
-      - cassandra
-      - elasticsearch
+      - "DEFAULT_NAMESPACE=default"
+    volumes:
+      - ${TEMPORAL_LOCAL_CERT_DIR}:${TEMPORAL_TLS_CERTS_DIR}
+      - ../../compose/scripts:/scripts
+    entrypoint: ["/bin/sh"]
+    command: /scripts/create-namespace.sh
+
   temporal-ui:
     image: temporalio/ui:${UI_TAG:-latest}
     ports:
@@ -64,7 +123,9 @@ services:
       - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
     depends_on:
-      - temporal
+      temporal:
+        condition: service_healthy
+
   temporal-admin-tools:
     image: temporalio/admin-tools:${SERVER_TAG:-latest}
     stdin_open: true
@@ -79,4 +140,5 @@ services:
       - "TEMPORAL_TLS_ENABLE_HOST_VERIFICATION=true"
       - "TEMPORAL_TLS_SERVER_NAME=tls-sample"
     depends_on:
-      - temporal
+      temporal:
+        condition: service_healthy
